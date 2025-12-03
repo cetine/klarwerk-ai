@@ -1,5 +1,11 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "mock_key", {
+const apiKey = process.env.STRIPE_SECRET_KEY;
+
+if (!apiKey && process.env.NODE_ENV === "production") {
+    throw new Error("STRIPE_SECRET_KEY is missing in production environment. Please add it to your Vercel project settings.");
+}
+
+export const stripe = new Stripe(apiKey || "mock_key", {
     typescript: true,
 });
