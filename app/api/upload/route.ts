@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-// const pdf = require("pdf-parse");
 import mammoth from "mammoth";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 export async function POST(req: Request) {
     try {
@@ -15,9 +15,18 @@ export async function POST(req: Request) {
         let text = "";
 
         if (file.type === "application/pdf") {
-            // const data = await pdf(buffer);
-            // text = data.text;
-            text = "PDF parsing is temporarily disabled due to build environment constraints. Please use DOCX or TXT.";
+            // Parse PDF using pdfjs-dist
+            const loadingTask = pdfjsLib.getDocument({ data: buffer });
+            const pdfDocument = await loadingTask.promise;
+
+            const textParts: string[] = [];
+            for (let i = 1; i <= pdfDocument.numPages; i++) {
+                const page = await pdfDocument.getPage(i);
+                const content = await page.getTextContent();
+                const pageText = content.items.map((item: any) => item.str).join(" ");
+                textParts.push(pageText);
+            }
+            text = textParts.join("\n");
         } else if (
             file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         ) {
