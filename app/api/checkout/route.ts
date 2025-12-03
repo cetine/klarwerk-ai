@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         const baseUrl = getBaseUrl();
 
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card", "sepa_debit", "paypal"], // Add German methods
+            payment_method_types: ["card"],
             line_items: [
                 {
                     price_data: {
