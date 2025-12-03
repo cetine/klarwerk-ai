@@ -21,14 +21,7 @@ export async function POST(req: Request) {
             payment_method_types: ["card"],
             line_items: [
                 {
-                    price_data: {
-                        currency: "eur",
-                        product_data: {
-                            name: "Vertragsanalyse Premium",
-                            description: "Detaillierte KI-Analyse Ihres Vertrags",
-                        },
-                        unit_amount: 399, // 3.99 EUR
-                    },
+                    price: "price_1RsjNR2aYP1cJiwgRm28FUpk",
                     quantity: 1,
                 },
             ],
