@@ -12,68 +12,66 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing text or email" }, { status: 400 });
     }
 
-    const assistantId = process.env.OPENAI_ASSISTANT_ID;
-    if (!assistantId) {
-      throw new Error("OPENAI_ASSISTANT_ID is not configured");
+    // Analyze with GPT-4o-mini using Chat Completions API
+    console.log("[Analyze] Calling OpenAI Chat Completions API...");
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `Du bist ein erfahrener deutscher Rechtsanwalt, spezialisiert auf Vertragsanalyse. 
+
+Deine Aufgabe ist es, Verträge zu analysieren und eine detaillierte, strukturierte Bewertung zu erstellen.
+
+** Analysiere jeden Vertrag nach folgenden Kriterien:**
+  1. ** Zusammenfassung **: Erstelle eine prägnante Zusammenfassung(2 - 3 Sätze)
+2. ** Risikobewertung **: Bewerte das Gesamtrisiko als "red"(hoch), "yellow"(mittel) oder "green"(gering)
+3. ** Kritische Klauseln **: Identifiziere problematische oder ungewöhnliche Klauseln
+4. ** Empfehlungen **: Gib konkrete, umsetzbare Handlungsempfehlungen
+
+  ** Antworte IMMER im folgenden JSON - Format:**
+    {
+      "summary": "Kurze Zusammenfassung des Vertrags (2-3 Sätze)",
+      "riskLevel": "red" | "yellow" | "green",
+      "riskExplanation": "Detaillierte Begründung für die Risikobewertung",
+      "criticalClauses": [
+        {
+          "title": "Titel der Klausel",
+          "content": "Relevanter Vertragstext",
+          "risk": "Warum ist diese Klausel kritisch oder problematisch?"
+        }
+      ],
+      "recommendations": [
+        "Konkrete Empfehlung 1",
+        "Konkrete Empfehlung 2"
+      ]
     }
 
-    // 1. Create a Thread
-    console.log("[Analyze] Creating thread...");
-    const thread = await openai.beta.threads.create();
-    console.log("[Analyze] Thread created:", thread.id);
+    ** Wichtige Regeln:**
+      - Verwende professionelles Deutsch(Sie - Form)
+        - Sei präzise und verständlich
+          - Antworte NUR mit dem JSON - Objekt, ohne zusätzlichen Text
+            - Wenn keine kritischen Klauseln gefunden werden, gib ein leeres Array zurück
+              - Gib mindestens 2 - 3 Empfehlungen
 
-    // 2. Add message to thread with the contract text
-    console.log("[Analyze] Adding message to thread...");
-    await openai.beta.threads.messages.create(thread.id, {
-      role: "user",
-      content: `Bitte analysiere folgenden Vertrag:\n\n${text}`,
+                ** Risikobewertung:**
+- ** red **: Vertrag enthält erhebliche Risiken oder unfaire Klauseln
+  - ** yellow **: Vertrag ist akzeptabel, aber mit Vorsicht zu behandeln
+    - ** green **: Vertrag ist fair und ausgewogen`,
+        },
+        {
+          role: "user",
+          content: `Bitte analysiere folgenden Vertrag: \n\n${text} `,
+        },
+      ],
+      response_format: { type: "json_object" },
     });
 
-    // 3. Run the assistant
-    console.log("[Analyze] Running assistant:", assistantId);
-    const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: assistantId,
-    });
-
-    // 4. Poll for completion
-    console.log("[Analyze] Polling for completion...");
-    let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
-      thread_id: thread.id,
-    });
-
-    while (runStatus.status === "queued" || runStatus.status === "in_progress") {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
-      runStatus = await openai.beta.threads.runs.retrieve(run.id, {
-        thread_id: thread.id,
-      });
-      console.log("[Analyze] Run status:", runStatus.status);
-    }
-
-    if (runStatus.status !== "completed") {
-      console.error("[Analyze] Run failed with status:", runStatus.status);
-      throw new Error(`Assistant run failed with status: ${runStatus.status}`);
-    }
-
-    // 5. Retrieve messages
-    console.log("[Analyze] Retrieving messages...");
-    const messages = await openai.beta.threads.messages.list(thread.id);
-    const assistantMessage = messages.data.find((msg) => msg.role === "assistant");
-
-    if (!assistantMessage || !assistantMessage.content[0]) {
-      throw new Error("No response from assistant");
-    }
-
-    // Extract text content
-    const content = assistantMessage.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected content type from assistant");
-    }
-
-    const analysisText = content.text.value;
-    console.log("[Analyze] Assistant response length:", analysisText?.length);
+    const analysisText = completion.choices[0].message.content;
+    console.log("[Analyze] OpenAI analysis complete. Length:", analysisText?.length);
 
     // Parse the JSON response
-    const analysis = JSON.parse(analysisText);
+    const analysis = JSON.parse(analysisText || "{}");
 
     console.log("[Analyze] Analysis parsed successfully");
     return NextResponse.json({ success: true, analysis });
