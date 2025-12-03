@@ -22,12 +22,20 @@ function SuccessContent() {
 
         const analyzeContract = async () => {
             try {
+                console.log("Starting analysis on domain:", window.location.origin);
                 setMessage("Vertrag wird analysiert... Dies kann bis zu 30 Sekunden dauern.");
 
                 const text = localStorage.getItem("contract_text");
                 const email = localStorage.getItem("user_email");
 
+                console.log("Storage check:", {
+                    hasText: !!text,
+                    textLength: text?.length,
+                    email
+                });
+
                 if (!text || !email) {
+                    console.error("Missing data in localStorage");
                     throw new Error("Vertragsdaten nicht gefunden.");
                 }
 

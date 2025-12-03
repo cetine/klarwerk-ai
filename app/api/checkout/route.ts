@@ -6,10 +6,14 @@ export async function POST(req: Request) {
         const { email, fileId } = await req.json();
 
         // Determine the base URL
-        // 1. NEXT_PUBLIC_URL (manual override or production URL)
-        // 2. VERCEL_URL (automatically set by Vercel, needs https://)
-        // 3. localhost fallback
+        // 1. Request Origin (Best for Vercel Previews & keeping user on same domain)
+        // 2. NEXT_PUBLIC_URL (Manual override)
+        // 3. VERCEL_URL (Fallback)
+        // 4. localhost fallback
         const getBaseUrl = () => {
+            const origin = req.headers.get("origin");
+            if (origin) return origin;
+
             if (process.env.NEXT_PUBLIC_URL) return process.env.NEXT_PUBLIC_URL;
             if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
             return "http://localhost:3000";
