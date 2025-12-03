@@ -30,20 +30,33 @@ export async function POST(req: Request) {
                     pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
                         clearTimeout(timeout);
                         try {
-                            // Extract text from parsed data manually to avoid getRawTextContent issues
-                            const pages = pdfData.Pages || [];
-                            const textParts: string[] = [];
+                            // Method 1: Try standard raw text extraction
+                            let extractedText = (pdfParser as any).getRawTextContent();
 
-                            pages.forEach((page: any) => {
-                                const texts = page.Texts || [];
-                                const pageText = texts.map((text: any) => {
-                                    return decodeURIComponent(text.R?.[0]?.T || "");
-                                }).join(" ");
-                                textParts.push(pageText);
-                            });
+                            // Method 2: If empty or failed, try manual extraction
+                            if (!extractedText || extractedText.trim().length === 0) {
+                                console.log("Standard extraction empty, trying manual extraction...");
+                                const pages = pdfData.Pages || [];
+                                const textParts: string[] = [];
 
-                            resolve(textParts.join("\n") || "PDF content extracted successfully but no text found.");
+                                pages.forEach((page: any) => {
+                                    const texts = page.Texts || [];
+                                    const pageText = texts.map((text: any) => {
+                                        // Try different properties where text might be stored
+                                        return decodeURIComponent(text.R?.[0]?.T || text.T || "");
+                                    }).join(" ");
+                                    textParts.push(pageText);
+                                });
+                                extractedText = textParts.join("\n");
+                            }
+
+                            if (!extractedText || extractedText.trim().length === 0) {
+                                resolve("PDF parsed successfully but contained no extractable text. It might be an image-only PDF.");
+                            } else {
+                                resolve(extractedText);
+                            }
                         } catch (err) {
+                            console.error("PDF extraction error:", err);
                             resolve("PDF parsed but text extraction failed. Please try a different format.");
                         }
                     });
