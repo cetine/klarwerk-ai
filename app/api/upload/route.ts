@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import PDFParser from "pdf2json";
 
 export async function POST(req: Request) {
     try {
@@ -15,18 +15,17 @@ export async function POST(req: Request) {
         let text = "";
 
         if (file.type === "application/pdf") {
-            // Parse PDF using pdfjs-dist
-            const loadingTask = pdfjsLib.getDocument({ data: buffer });
-            const pdfDocument = await loadingTask.promise;
+            // Parse PDF using pdf2json
+            const pdfParser = new (PDFParser as any)(null, 1);
 
-            const textParts: string[] = [];
-            for (let i = 1; i <= pdfDocument.numPages; i++) {
-                const page = await pdfDocument.getPage(i);
-                const content = await page.getTextContent();
-                const pageText = content.items.map((item: any) => item.str).join(" ");
-                textParts.push(pageText);
-            }
-            text = textParts.join("\n");
+            text = await new Promise<string>((resolve, reject) => {
+                pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
+                pdfParser.on("pdfParser_dataReady", () => {
+                    const rawText = (pdfParser as any).getRawTextContent();
+                    resolve(rawText);
+                });
+                pdfParser.parseBuffer(buffer);
+            });
         } else if (
             file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         ) {
