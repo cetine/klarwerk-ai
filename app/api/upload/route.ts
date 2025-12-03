@@ -15,17 +15,50 @@ export async function POST(req: Request) {
         let text = "";
 
         if (file.type === "application/pdf") {
-            // Parse PDF using pdf2json
-            const pdfParser = new (PDFParser as any)(null, 1);
+            // Parse PDF using pdf2json with error handling
+            try {
+                const pdfParser = new (PDFParser as any)(null, 1);
 
-            text = await new Promise<string>((resolve, reject) => {
-                pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
-                pdfParser.on("pdfParser_dataReady", () => {
-                    const rawText = (pdfParser as any).getRawTextContent();
-                    resolve(rawText);
+                text = await new Promise<string>((resolve, reject) => {
+                    let timeout: NodeJS.Timeout;
+
+                    pdfParser.on("pdfParser_dataError", (errData: any) => {
+                        clearTimeout(timeout);
+                        reject(new Error(errData.parserError || "PDF parsing failed"));
+                    });
+
+                    pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+                        clearTimeout(timeout);
+                        try {
+                            // Extract text from parsed data manually to avoid getRawTextContent issues
+                            const pages = pdfData.Pages || [];
+                            const textParts: string[] = [];
+
+                            pages.forEach((page: any) => {
+                                const texts = page.Texts || [];
+                                const pageText = texts.map((text: any) => {
+                                    return decodeURIComponent(text.R?.[0]?.T || "");
+                                }).join(" ");
+                                textParts.push(pageText);
+                            });
+
+                            resolve(textParts.join("\n") || "PDF content extracted successfully but no text found.");
+                        } catch (err) {
+                            resolve("PDF parsed but text extraction failed. Please try a different format.");
+                        }
+                    });
+
+                    // Set timeout for parsing
+                    timeout = setTimeout(() => {
+                        reject(new Error("PDF parsing timeout"));
+                    }, 30000); // 30 second timeout
+
+                    pdfParser.parseBuffer(buffer);
                 });
-                pdfParser.parseBuffer(buffer);
-            });
+            } catch (error) {
+                console.error("PDF parsing error:", error);
+                text = "PDF parsing encountered an error. Please try uploading the document as DOCX or TXT format for best results.";
+            }
         } else if (
             file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         ) {
