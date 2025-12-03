@@ -2,16 +2,30 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { AnalysisResults } from "@/components/AnalysisResults";
+
+interface AnalysisData {
+    summary: string;
+    riskLevel: "red" | "yellow" | "green";
+    riskExplanation: string;
+    criticalClauses: Array<{
+        title: string;
+        content: string;
+        risk: string;
+    }>;
+    recommendations: string[];
+}
 
 function SuccessContent() {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get("session_id");
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const [message, setMessage] = useState("Zahlung wird überprüft...");
+    const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
 
     useEffect(() => {
         if (!sessionId) {
@@ -47,7 +61,10 @@ function SuccessContent() {
 
                 if (!res.ok) throw new Error("Analyse fehlgeschlagen.");
 
+                const data = await res.json();
+                setAnalysis(data.analysis);
                 setStatus("success");
+
                 // Clear storage
                 localStorage.removeItem("contract_text");
                 localStorage.removeItem("user_email");
@@ -61,49 +78,45 @@ function SuccessContent() {
         analyzeContract();
     }, [sessionId]);
 
-    return (
-        <Card className="w-full max-w-md text-center">
-            <CardHeader>
-                <div className="mx-auto mb-4">
-                    {status === "loading" && (
+    if (status === "loading") {
+        return (
+            <Card className="w-full max-w-md text-center">
+                <CardHeader>
+                    <div className="mx-auto mb-4">
                         <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
-                    )}
-                    {status === "success" && (
-                        <CheckCircle className="h-12 w-12 text-green-500" />
-                    )}
-                    {status === "error" && (
-                        <AlertCircle className="h-12 w-12 text-red-500" />
-                    )}
-                </div>
-                <CardTitle>
-                    {status === "loading" && "Einen Moment bitte"}
-                    {status === "success" && "Analyse erfolgreich!"}
-                    {status === "error" && "Ein Fehler ist aufgetreten"}
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-slate-600 mb-6">{message}</p>
-
-                {status === "success" && (
-                    <div className="space-y-4">
-                        <p className="text-sm text-slate-500">
-                            Wir haben die Analyse an Ihre E-Mail-Adresse gesendet.
-                            Bitte überprüfen Sie auch Ihren Spam-Ordner.
-                        </p>
-                        <Button asChild className="w-full">
-                            <Link href="/">Zurück zur Startseite</Link>
-                        </Button>
                     </div>
-                )}
+                    <CardTitle>Einen Moment bitte</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-slate-600 mb-6">{message}</p>
+                    <p className="text-sm text-slate-500">
+                        Die KI analysiert Ihren Vertrag. Dies kann bis zu 30 Sekunden dauern.
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
 
-                {status === "error" && (
+    if (status === "error") {
+        return (
+            <Card className="w-full max-w-md text-center">
+                <CardHeader>
+                    <div className="mx-auto mb-4">
+                        <AlertCircle className="h-12 w-12 text-red-500" />
+                    </div>
+                    <CardTitle>Ein Fehler ist aufgetreten</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-slate-600 mb-6">{message}</p>
                     <Button asChild variant="outline" className="w-full">
                         <Link href="/">Zurück</Link>
                     </Button>
-                )}
-            </CardContent>
-        </Card>
-    );
+                </CardContent>
+            </Card>
+        );
+    }
+
+    return analysis ? <AnalysisResults analysis={analysis} /> : null;
 }
 
 export default function SuccessPage() {

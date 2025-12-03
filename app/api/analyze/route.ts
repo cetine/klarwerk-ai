@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
-import { sendEmail } from "@/lib/sendgrid";
 
 export async function POST(req: Request) {
     try {
@@ -13,7 +12,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Missing text or email" }, { status: 400 });
         }
 
-        // 1. Analyze with GPT-4o-mini
+        // Analyze with GPT-4o-mini
         console.log("[Analyze] Calling OpenAI API...");
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
@@ -21,39 +20,43 @@ export async function POST(req: Request) {
                 {
                     role: "system",
                     content: `Du bist ein erfahrener deutscher Rechtsanwalt. Analysiere den folgenden Vertrag (${contractType || "Allgemein"}).
-          Erstelle eine detaillierte Analyse mit:
-          1. Zusammenfassung
-          2. Risikobewertung (Rot/Gelb/Grün) mit Begründung
-          3. Kritische Klauseln und deren Bedeutung
-          4. Verbesserungsvorschläge
           
-          Antworte im HTML-Format für eine E-Mail. Verwende professionelles Deutsch (Sie-Form).`,
+Erstelle eine detaillierte Analyse im JSON-Format mit folgender Struktur:
+{
+  "summary": "Kurze Zusammenfassung des Vertrags (2-3 Sätze)",
+  "riskLevel": "red" | "yellow" | "green",
+  "riskExplanation": "Begründung für die Risikobewertung",
+  "criticalClauses": [
+    {
+      "title": "Titel der Klausel",
+      "content": "Inhalt der Klausel",
+      "risk": "Warum ist diese Klausel kritisch?"
+    }
+  ],
+  "recommendations": [
+    "Empfehlung 1",
+    "Empfehlung 2"
+  ]
+}
+
+Antworte NUR mit dem JSON-Objekt, ohne zusätzlichen Text. Verwende professionelles Deutsch (Sie-Form).`,
                 },
                 {
                     role: "user",
                     content: text,
                 },
             ],
+            response_format: { type: "json_object" },
         });
 
-        const analysis = completion.choices[0].message.content;
-        console.log("[Analyze] OpenAI analysis complete. Length:", analysis?.length);
+        const analysisText = completion.choices[0].message.content;
+        console.log("[Analyze] OpenAI analysis complete. Length:", analysisText?.length);
 
-        // 2. Send Email
-        console.log("[Analyze] Sending email to:", email);
-        const emailResult = await sendEmail(
-            email,
-            "Ihre Vertragsanalyse ist bereit - VertragsKlar",
-            analysis || "Leider konnte keine Analyse erstellt werden.",
-        );
+        // Parse the JSON response
+        const analysis = JSON.parse(analysisText || "{}");
 
-        if (!emailResult.success) {
-            console.error("[Analyze] Email send failed:", emailResult.error);
-            return NextResponse.json({ error: "Email delivery failed" }, { status: 500 });
-        }
-
-        console.log("[Analyze] Email sent successfully");
-        return NextResponse.json({ success: true });
+        console.log("[Analyze] Analysis parsed successfully");
+        return NextResponse.json({ success: true, analysis });
     } catch (error) {
         console.error("Analysis error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
