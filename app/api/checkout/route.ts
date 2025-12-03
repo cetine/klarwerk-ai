@@ -5,6 +5,18 @@ export async function POST(req: Request) {
     try {
         const { email, fileId } = await req.json();
 
+        // Determine the base URL
+        // 1. NEXT_PUBLIC_URL (manual override or production URL)
+        // 2. VERCEL_URL (automatically set by Vercel, needs https://)
+        // 3. localhost fallback
+        const getBaseUrl = () => {
+            if (process.env.NEXT_PUBLIC_URL) return process.env.NEXT_PUBLIC_URL;
+            if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+            return "http://localhost:3000";
+        };
+
+        const baseUrl = getBaseUrl();
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card", "sepa_debit", "paypal"], // Add German methods
             line_items: [
@@ -21,8 +33,8 @@ export async function POST(req: Request) {
                 },
             ],
             mode: "payment",
-            success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_URL}/`,
+            success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${baseUrl}/`,
             customer_email: email,
             metadata: {
                 fileId: fileId, // In a real app, this would be the ID of the stored file
