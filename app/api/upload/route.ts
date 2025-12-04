@@ -17,7 +17,9 @@ export async function POST(req: Request) {
         if (file.type === "application/pdf") {
             // Parse PDF using unpdf - simple and reliable
             try {
-                const { text: extractedText } = await extractText(buffer, { mergePages: true });
+                // Convert Buffer to Uint8Array as required by unpdf
+                const uint8Array = new Uint8Array(buffer);
+                const { text: extractedText } = await extractText(uint8Array, { mergePages: true });
                 text = extractedText || "PDF parsed successfully but contained no extractable text. It might be an image-only PDF.";
             } catch (error) {
                 console.error("PDF parsing error:", error);
