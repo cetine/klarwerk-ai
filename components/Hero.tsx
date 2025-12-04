@@ -8,7 +8,7 @@ export function Hero() {
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 mb-6">
                         <span className="flex h-2 w-2 rounded-full bg-blue-600 mr-2"></span>
-                        Neu: GPT-4o Analyse
+                        Neu: Multi-KI Analyse
                     </div>
                     <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
                         Verträge verstehen. <br />

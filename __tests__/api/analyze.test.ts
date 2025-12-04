@@ -30,13 +30,60 @@ describe('/api/analyze', () => {
         expect(data.error).toBe('Missing text or email');
     });
 
-    it('should analyze contract successfully', async () => {
+    it('should analyze contract successfully with enhanced structure', async () => {
         const mockAnalysis = {
-            summary: 'Test Summary',
-            riskLevel: 'green',
-            riskExplanation: 'Low risk',
-            criticalClauses: [],
-            recommendations: ['Rec 1'],
+            contractType: 'Mietvertrag',
+            contractScore: 72,
+            scoreBreakdown: {
+                rechtssicherheit: 80,
+                ausgewogenheit: 65,
+                transparenz: 75,
+                vollstaendigkeit: 68,
+            },
+            executiveSummary: 'This is a standard rental agreement with some areas for improvement.',
+            riskLevel: 'yellow',
+            riskExplanation: 'Moderate risk due to certain clauses.',
+            legalBasis: [
+                {
+                    law: 'BGB',
+                    sections: '§§ 535-580a',
+                    relevance: 'Mietrecht Grundlagen',
+                },
+            ],
+            positiveAspects: [
+                {
+                    title: 'Klare Kündigungsfristen',
+                    description: 'Die Kündigungsfristen entsprechen den gesetzlichen Vorgaben.',
+                },
+            ],
+            criticalClauses: [
+                {
+                    title: 'Schönheitsreparaturen',
+                    content: 'Der Mieter ist zu regelmäßigen Schönheitsreparaturen verpflichtet.',
+                    risk: 'Diese Klausel könnte unwirksam sein.',
+                    severity: 'medium',
+                    legalConcern: 'Möglicherweise unwirksam nach § 307 BGB',
+                },
+            ],
+            riskMatrix: {
+                financial: { level: 'medium', description: 'Moderate finanzielle Belastung' },
+                legal: { level: 'low', description: 'Geringe rechtliche Risiken' },
+                operational: { level: 'low', description: 'Keine operativen Einschränkungen' },
+            },
+            negotiationPoints: [
+                {
+                    priority: 'high',
+                    clause: 'Schönheitsreparaturen',
+                    suggestion: 'Streichung oder Anpassung empfohlen',
+                    reasoning: 'Klausel könnte vor Gericht nicht standhalten',
+                },
+            ],
+            recommendations: [
+                'Prüfen Sie die Schönheitsreparaturklausel',
+                'Vergleichen Sie die Miethöhe mit dem Mietspiegel',
+                'Dokumentieren Sie den Zustand bei Einzug',
+            ],
+            disclaimer: 'Diese Analyse ersetzt keine individuelle Rechtsberatung.',
         };
 
         (openai.chat.completions.create as jest.Mock).mockResolvedValue({
@@ -63,6 +110,11 @@ describe('/api/analyze', () => {
 
         expect(response.status).toBe(200);
         expect(data.success).toBe(true);
-        expect(data.analysis).toEqual(mockAnalysis);
+        expect(data.analysis.contractScore).toBe(72);
+        expect(data.analysis.contractType).toBe('Mietvertrag');
+        expect(data.analysis.scoreBreakdown).toBeDefined();
+        expect(data.analysis.positiveAspects).toHaveLength(1);
+        expect(data.analysis.riskMatrix).toBeDefined();
+        expect(data.analysis.negotiationPoints).toHaveLength(1);
     });
 });
