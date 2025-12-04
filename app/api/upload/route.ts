@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
-import PDFParser from "pdf2json";
+import { extractText } from "unpdf";
 
 export async function POST(req: Request) {
     try {
@@ -15,64 +15,10 @@ export async function POST(req: Request) {
         let text = "";
 
         if (file.type === "application/pdf") {
-            // Parse PDF using pdf2json with error handling
+            // Parse PDF using unpdf - simple and reliable
             try {
-                const pdfParser = new (PDFParser as any)(null, 1);
-
-                text = await new Promise<string>((resolve, reject) => {
-                    let timeout: NodeJS.Timeout;
-
-                    pdfParser.on("pdfParser_dataError", (errData: any) => {
-                        clearTimeout(timeout);
-                        reject(new Error(errData.parserError || "PDF parsing failed"));
-                    });
-
-                    pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
-                        clearTimeout(timeout);
-                        try {
-                            // Method 1: Try standard raw text extraction
-                            let extractedText = "";
-                            try {
-                                extractedText = (pdfParser as any).getRawTextContent();
-                            } catch (e) {
-                                console.warn("getRawTextContent failed, switching to manual extraction:", e);
-                            }
-
-                            // Method 2: If empty or failed, try manual extraction
-                            if (!extractedText || extractedText.trim().length === 0) {
-                                console.log("Standard extraction empty, trying manual extraction...");
-                                const pages = pdfData.Pages || [];
-                                const textParts: string[] = [];
-
-                                pages.forEach((page: any) => {
-                                    const texts = page.Texts || [];
-                                    const pageText = texts.map((text: any) => {
-                                        // Try different properties where text might be stored
-                                        return decodeURIComponent(text.R?.[0]?.T || text.T || "");
-                                    }).join(" ");
-                                    textParts.push(pageText);
-                                });
-                                extractedText = textParts.join("\n");
-                            }
-
-                            if (!extractedText || extractedText.trim().length === 0) {
-                                resolve("PDF parsed successfully but contained no extractable text. It might be an image-only PDF.");
-                            } else {
-                                resolve(extractedText);
-                            }
-                        } catch (err) {
-                            console.error("PDF extraction error:", err);
-                            resolve("PDF parsed but text extraction failed. Please try a different format.");
-                        }
-                    });
-
-                    // Set timeout for parsing
-                    timeout = setTimeout(() => {
-                        reject(new Error("PDF parsing timeout"));
-                    }, 30000); // 30 second timeout
-
-                    pdfParser.parseBuffer(buffer);
-                });
+                const { text: extractedText } = await extractText(buffer, { mergePages: true });
+                text = extractedText || "PDF parsed successfully but contained no extractable text. It might be an image-only PDF.";
             } catch (error) {
                 console.error("PDF parsing error:", error);
                 text = "PDF parsing encountered an error. Please try uploading the document as DOCX or TXT format for best results.";
