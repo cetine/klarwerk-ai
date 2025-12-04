@@ -31,7 +31,12 @@ export async function POST(req: Request) {
                         clearTimeout(timeout);
                         try {
                             // Method 1: Try standard raw text extraction
-                            let extractedText = (pdfParser as any).getRawTextContent();
+                            let extractedText = "";
+                            try {
+                                extractedText = (pdfParser as any).getRawTextContent();
+                            } catch (e) {
+                                console.warn("getRawTextContent failed, switching to manual extraction:", e);
+                            }
 
                             // Method 2: If empty or failed, try manual extraction
                             if (!extractedText || extractedText.trim().length === 0) {
