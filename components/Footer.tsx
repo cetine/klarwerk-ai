@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Brain, Scale, Shield } from "lucide-react";
 
 export function Footer() {
     return (
@@ -10,8 +11,23 @@ export function Footer() {
                             VertragsKlar
                         </Link>
                         <p className="mt-4 text-slate-500 text-sm max-w-xs">
-                            Ihre intelligente Vertragsanalyse. Wir helfen Ihnen, rechtliche Dokumente zu verstehen und Risiken zu minimieren.
+                            Professionelle Vertragsanalyse durch spezialisierte juristische Algorithmen.
+                            Unser Multi-KI-System prüft Ihre Verträge nach deutschen Rechtsstandards.
                         </p>
+                        <div className="flex gap-4 mt-4">
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                                <Brain className="w-4 h-4" />
+                                Multi-KI
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                                <Scale className="w-4 h-4" />
+                                Rechtskonform
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                                <Shield className="w-4 h-4" />
+                                DSGVO
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <h3 className="font-semibold text-slate-900 mb-4">Rechtliches</h3>
@@ -48,9 +64,9 @@ export function Footer() {
                     <p className="text-slate-400 text-sm">
                         &copy; {new Date().getFullYear()} VertragsKlar. Alle Rechte vorbehalten.
                     </p>
-                    <div className="flex space-x-4 mt-4 md:mt-0">
-                        {/* Social icons could go here */}
-                    </div>
+                    <p className="text-slate-400 text-xs mt-2 md:mt-0">
+                        Keine Rechtsberatung. Entwickelt in Deutschland.
+                    </p>
                 </div>
             </div>
         </footer>

@@ -54,10 +54,10 @@ interface AnalysisData {
 }
 
 const analysisSteps = [
-    { icon: FileText, label: "Dokument wird vorbereitet", subtext: "Textextraktion und Formatierung" },
-    { icon: Scale, label: "Rechtliche Prüfung", subtext: "Analyse nach deutschem Vertragsrecht" },
-    { icon: Shield, label: "Risikobewertung", subtext: "Identifikation kritischer Klauseln" },
-    { icon: CheckCircle2, label: "Bericht wird erstellt", subtext: "Zusammenstellung der Ergebnisse" },
+    { icon: FileText, label: "Dokument wird vorbereitet", subtext: "Textextraktion und juristische Strukturanalyse" },
+    { icon: Scale, label: "Multi-KI-Prüfung", subtext: "Spezialisierte Algorithmen nach BGB & AGB-Recht" },
+    { icon: Shield, label: "Risikobewertung", subtext: "Identifikation kritischer und positiver Klauseln" },
+    { icon: CheckCircle2, label: "Expertenbericht", subtext: "Zusammenstellung mit Handlungsempfehlungen" },
 ];
 
 function SuccessContent() {
@@ -142,7 +142,7 @@ function SuccessContent() {
                         Analyse läuft
                     </CardTitle>
                     <p className="text-slate-500 mt-2">
-                        Unsere Experten-Algorithmen prüfen Ihren Vertrag
+                        Unser Multi-KI-System mit spezialisierten juristischen Algorithmen prüft Ihren Vertrag
                     </p>
                 </CardHeader>
                 <CardContent className="pt-6">
@@ -156,18 +156,18 @@ function SuccessContent() {
                                 <div
                                     key={index}
                                     className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-500 ${isActive
-                                            ? "bg-blue-50 border border-blue-200"
-                                            : isComplete
-                                                ? "bg-emerald-50 border border-emerald-200"
-                                                : "bg-slate-50 border border-slate-100"
+                                        ? "bg-blue-50 border border-blue-200"
+                                        : isComplete
+                                            ? "bg-emerald-50 border border-emerald-200"
+                                            : "bg-slate-50 border border-slate-100"
                                         }`}
                                 >
                                     <div
                                         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${isActive
-                                                ? "bg-blue-100 text-blue-600"
-                                                : isComplete
-                                                    ? "bg-emerald-100 text-emerald-600"
-                                                    : "bg-slate-100 text-slate-400"
+                                            ? "bg-blue-100 text-blue-600"
+                                            : isComplete
+                                                ? "bg-emerald-100 text-emerald-600"
+                                                : "bg-slate-100 text-slate-400"
                                             }`}
                                     >
                                         {isComplete ? (
@@ -181,20 +181,20 @@ function SuccessContent() {
                                     <div className="flex-1">
                                         <p
                                             className={`font-medium transition-colors ${isActive
-                                                    ? "text-blue-900"
-                                                    : isComplete
-                                                        ? "text-emerald-900"
-                                                        : "text-slate-500"
+                                                ? "text-blue-900"
+                                                : isComplete
+                                                    ? "text-emerald-900"
+                                                    : "text-slate-500"
                                                 }`}
                                         >
                                             {step.label}
                                         </p>
                                         <p
                                             className={`text-sm transition-colors ${isActive
-                                                    ? "text-blue-600"
-                                                    : isComplete
-                                                        ? "text-emerald-600"
-                                                        : "text-slate-400"
+                                                ? "text-blue-600"
+                                                : isComplete
+                                                    ? "text-emerald-600"
+                                                    : "text-slate-400"
                                                 }`}
                                         >
                                             {step.subtext}

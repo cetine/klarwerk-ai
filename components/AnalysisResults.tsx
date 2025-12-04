@@ -285,7 +285,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             <div className="text-center space-y-2">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-100 rounded-full text-sm text-slate-600 mb-4">
                     <Scale className="w-4 h-4" />
-                    <span>Rechtliche Vertragsanalyse</span>
+                    <span>Multi-KI Expertenanalyse</span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
                     Ihre Vertragsanalyse

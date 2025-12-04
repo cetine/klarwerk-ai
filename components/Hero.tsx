@@ -1,5 +1,5 @@
 import { UploadForm } from "@/components/UploadForm";
-import { CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Zap, Scale, Brain } from "lucide-react";
 
 export function Hero() {
     return (
@@ -8,30 +8,46 @@ export function Hero() {
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 mb-6">
                         <span className="flex h-2 w-2 rounded-full bg-blue-600 mr-2"></span>
-                        Neu: Multi-KI Analyse
+                        Spezialisierte Rechtsanalyse-KI
                     </div>
                     <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
                         Verträge verstehen. <br />
                         <span className="text-blue-600">Risiken vermeiden.</span>
                     </h1>
                     <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Laden Sie Ihren Mietvertrag, Arbeitsvertrag oder Kaufvertrag hoch.
-                        Unsere KI analysiert das Kleingedruckte und findet versteckte Risiken
-                        in Sekunden.
+                        Unser <strong>Multi-KI-System</strong> kombiniert spezialisierte juristische Algorithmen
+                        mit modernster Sprachverarbeitung. Entwickelt nach deutschen Rechtsstandards
+                        für präzise Vertragsanalysen.
                     </p>
 
-                    <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-500 mb-12">
+                    <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-600 mb-12">
                         <div className="flex items-center">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                            <span>Sofortige Analyse</span>
+                            <Brain className="w-5 h-5 text-blue-600 mr-2" />
+                            <span>Multi-KI-Analyse</span>
                         </div>
                         <div className="flex items-center">
-                            <ShieldCheck className="w-4 h-4 text-blue-500 mr-2" />
-                            <span>Datenschutzkonform</span>
+                            <Scale className="w-5 h-5 text-indigo-600 mr-2" />
+                            <span>Juristische Workflows</span>
                         </div>
                         <div className="flex items-center">
-                            <Zap className="w-4 h-4 text-yellow-500 mr-2" />
-                            <span>Einfache Sprache</span>
+                            <ShieldCheck className="w-5 h-5 text-emerald-600 mr-2" />
+                            <span>DSGVO-konform</span>
+                        </div>
+                    </div>
+
+                    {/* Feature Pills */}
+                    <div className="flex flex-wrap justify-center gap-3 mb-12">
+                        <div className="px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm text-sm text-slate-700">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 inline mr-1.5" />
+                            BGB-konforme Prüfung
+                        </div>
+                        <div className="px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm text-sm text-slate-700">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 inline mr-1.5" />
+                            AGB-Recht Spezialisierung
+                        </div>
+                        <div className="px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm text-sm text-slate-700">
+                            <Zap className="w-4 h-4 text-amber-500 inline mr-1.5" />
+                            Ergebnis in Sekunden
                         </div>
                     </div>
                 </div>
