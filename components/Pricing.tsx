@@ -1,37 +1,40 @@
 import { Check, Brain, Scale, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Pricing() {
     return (
-        <section className="py-24 bg-slate-50" id="pricing">
+        <section className="py-28 bg-[#f5f5f7]" id="pricing">
             <div className="container mx-auto px-4">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-4">
-                        Professionelle Analyse zum fairen Preis
+                <div className="text-center mb-20 stagger-children">
+                    <h2 className="text-4xl font-semibold tracking-tight text-[#1d1d1f] sm:text-5xl mb-6">
+                        Professionelle Analyse.
+                        <br />
+                        <span className="text-[#86868b]">Fairer Preis.</span>
                     </h2>
-                    <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                        Kein Abo. Keine versteckten Kosten. Zahlen Sie nur für das, was Sie brauchen –
-                        mit der Qualität spezialisierter Rechtsanalyse.
+                    <p className="text-xl text-[#86868b] max-w-2xl mx-auto">
+                        Kein Abo. Keine versteckten Kosten.
                     </p>
                 </div>
 
                 <div className="max-w-md mx-auto">
-                    <Card className="border-blue-200 shadow-xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                            EMPFOHLEN
-                        </div>
-                        <CardHeader className="text-center pb-8 border-b border-slate-100">
-                            <CardTitle className="text-xl font-medium text-slate-500 mb-2">
-                                Expertenanalyse
-                            </CardTitle>
-                            <div className="flex items-baseline justify-center text-slate-900">
-                                <span className="text-5xl font-bold">€3,99</span>
-                                <span className="text-slate-500 ml-2">/ Dokument</span>
+                    <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden hover-lift">
+                        {/* Badge */}
+                        <div className="absolute top-6 right-6">
+                            <div className="px-3 py-1 bg-[#0071e3] text-white text-xs font-semibold rounded-full">
+                                Empfohlen
                             </div>
-                        </CardHeader>
-                        <CardContent className="pt-8">
-                            <ul className="space-y-4">
+                        </div>
+
+                        <div className="p-10 text-center border-b border-[#f5f5f7]">
+                            <p className="text-[#86868b] font-medium mb-4">Expertenanalyse</p>
+                            <div className="flex items-baseline justify-center text-[#1d1d1f]">
+                                <span className="text-6xl font-semibold">€3,99</span>
+                            </div>
+                            <p className="text-[#86868b] mt-2">pro Dokument</p>
+                        </div>
+
+                        <div className="p-10">
+                            <ul className="space-y-5">
                                 {[
                                     { icon: Brain, text: "Multi-KI-Analyse mit spezialisierten Modellen" },
                                     { icon: Scale, text: "Juristische Prüfung nach BGB & AGB-Recht" },
@@ -42,40 +45,41 @@ export function Pricing() {
                                 ].map((feature, index) => {
                                     const Icon = feature.icon;
                                     return (
-                                        <li key={index} className="flex items-start">
-                                            <Icon className="h-5 w-5 text-blue-600 mr-3 shrink-0" />
-                                            <span className="text-slate-700">{feature.text}</span>
+                                        <li key={index} className="flex items-start gap-4">
+                                            <div className="w-6 h-6 rounded-full bg-[#0071e3]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <Icon className="w-3.5 h-3.5 text-[#0071e3]" />
+                                            </div>
+                                            <span className="text-[#1d1d1f]">{feature.text}</span>
                                         </li>
                                     );
                                 })}
                             </ul>
-                        </CardContent>
-                        <CardFooter className="bg-slate-50 p-6">
-                            <Button className="w-full bg-slate-900 hover:bg-slate-800 h-12 text-lg">
+
+                            <Button className="w-full mt-8 bg-[#0071e3] hover:bg-[#0077ed] text-white font-semibold py-7 text-lg rounded-xl transition-all duration-300">
                                 Jetzt Vertrag prüfen
                             </Button>
-                        </CardFooter>
-                    </Card>
-                    <p className="text-center text-xs text-slate-400 mt-4">
-                        Preise inkl. MwSt. Sichere Zahlung über Stripe. Daten werden nach Analyse gelöscht.
+                        </div>
+                    </div>
+
+                    <p className="text-center text-sm text-[#86868b] mt-6">
+                        Sichere Zahlung über Stripe · Daten werden nach Analyse gelöscht
                     </p>
                 </div>
 
-                {/* Trust Indicators */}
-                <div className="mt-16 text-center">
-                    <p className="text-sm text-slate-500 mb-6">Entwickelt für den deutschen Rechtsraum</p>
-                    <div className="flex flex-wrap justify-center gap-8 text-slate-400">
+                {/* Trust */}
+                <div className="mt-20 text-center">
+                    <div className="flex flex-wrap justify-center gap-10 text-[#86868b]">
                         <div className="flex items-center gap-2">
                             <Shield className="w-5 h-5" />
-                            <span className="text-sm">DSGVO-konform</span>
+                            <span>DSGVO-konform</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Scale className="w-5 h-5" />
-                            <span className="text-sm">Deutsche Rechtsstandards</span>
+                            <span>Deutsche Rechtsstandards</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Brain className="w-5 h-5" />
-                            <span className="text-sm">Spezialisierte Algorithmen</span>
+                            <span>Spezialisierte Algorithmen</span>
                         </div>
                     </div>
                 </div>
