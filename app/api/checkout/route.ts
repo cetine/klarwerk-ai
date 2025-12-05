@@ -5,11 +5,10 @@ export async function POST(req: Request) {
     try {
         const { email, fileId } = await req.json();
 
+        // Get Price ID from environment or use default
+        const priceId = process.env.STRIPE_PRICE_ID || "price_1RsjNR2aYP1cJiwgRm28FUpk";
+
         // Determine the base URL
-        // 1. Request Origin (Best for Vercel Previews & keeping user on same domain)
-        // 2. NEXT_PUBLIC_URL (Manual override)
-        // 3. VERCEL_URL (Fallback)
-        // 4. localhost fallback
         const getBaseUrl = () => {
             const origin = req.headers.get("origin");
             if (origin) return origin;
@@ -21,11 +20,19 @@ export async function POST(req: Request) {
 
         const baseUrl = getBaseUrl();
 
+        console.log("Creating Stripe session with:", {
+            email,
+            fileId,
+            priceId,
+            baseUrl,
+            hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+        });
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: [
                 {
-                    price: "price_1RsjNR2aYP1cJiwgRm28FUpk",
+                    price: priceId,
                     quantity: 1,
                 },
             ],
@@ -35,13 +42,24 @@ export async function POST(req: Request) {
             cancel_url: `${baseUrl}/`,
             customer_email: email,
             metadata: {
-                fileId: fileId, // In a real app, this would be the ID of the stored file
+                fileId: fileId,
             },
         });
 
+        console.log("Stripe session created:", session.id);
+
         return NextResponse.json({ url: session.url });
     } catch (error) {
-        console.error("Stripe error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        console.error("Stripe error details:", {
+            message: error instanceof Error ? error.message : "Unknown error",
+            type: (error as { type?: string })?.type,
+            code: (error as { code?: string })?.code,
+            statusCode: (error as { statusCode?: number })?.statusCode,
+        });
+        return NextResponse.json(
+            { error: "Checkout konnte nicht erstellt werden. Bitte versuchen Sie es erneut." },
+            { status: 500 }
+        );
     }
 }
+

@@ -8,4 +8,7 @@ if (!apiKey && process.env.NODE_ENV === "production") {
 
 export const stripe = new Stripe(apiKey || "mock_key", {
     typescript: true,
+    timeout: 30000, // 30 seconds timeout
+    maxNetworkRetries: 2,
 });
+
