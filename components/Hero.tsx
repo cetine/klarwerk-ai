@@ -3,7 +3,7 @@ import { CheckCircle2, ShieldCheck, Zap, Scale, Brain } from "lucide-react";
 
 export function Hero() {
     return (
-        <section className="relative overflow-hidden pt-24 pb-32 lg:pt-36 lg:pb-44">
+        <section className="relative overflow-hidden pt-24 pb-32 lg:pt-36 lg:pb-44" id="upload">
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center max-w-4xl mx-auto mb-16 stagger-children">
                     {/* Badge */}

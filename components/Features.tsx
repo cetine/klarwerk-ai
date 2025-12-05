@@ -90,7 +90,7 @@ export function Features() {
                             { value: "< 2 Min.", label: "Analysezeit" },
                             { value: "24h", label: "Auto-Löschung" },
                             { value: "100%", label: "DSGVO-konform" },
-                            { value: "€3,99", label: "Pro Dokument" },
+                            { value: "€0,99", label: "Statt €3,99" },
                         ].map((stat, index) => (
                             <div key={index} className="text-center">
                                 <div className="text-3xl md:text-4xl font-semibold text-white mb-2">
