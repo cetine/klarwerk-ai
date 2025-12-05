@@ -163,8 +163,7 @@ export function AICouncil() {
                                         <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${colors.bg} ${colors.border} border`}>
                                             <span className={colors.text}>{agent.icon}</span>
                                         </div>
-                                        <h4 className="text-sm font-semibold text-white mb-0.5">{agent.name}</h4>
-                                        <p className="text-xs text-white/40">{agent.specialty}</p>
+                                        <h4 className="text-sm font-semibold text-white">{agent.name}</h4>
                                     </div>
                                 </div>
                             );
