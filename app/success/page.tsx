@@ -91,11 +91,13 @@ function SuccessContent() {
 
                 const text = localStorage.getItem("contract_text");
                 const email = localStorage.getItem("user_email");
+                const fileId = localStorage.getItem("file_id");
 
                 console.log("Storage check:", {
                     hasText: !!text,
                     textLength: text?.length,
-                    email
+                    email,
+                    fileId
                 });
 
                 if (!text || !email) {
@@ -106,7 +108,7 @@ function SuccessContent() {
                 const res = await fetch("/api/analyze", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text, email }),
+                    body: JSON.stringify({ text, email, fileId }),
                 });
 
                 if (!res.ok) throw new Error("Analyse fehlgeschlagen.");

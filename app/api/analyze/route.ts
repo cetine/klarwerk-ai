@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
+import { put } from "@vercel/blob";
 
 export async function POST(req: Request) {
   try {
-    const { text, email } = await req.json();
+    const { text, email, fileId } = await req.json();
 
     console.log("[Analyze] Starting analysis for:", email);
     console.log("[Analyze] Text length:", text?.length);
+    console.log("[Analyze] File ID:", fileId);
 
     if (!text || !email) {
       return NextResponse.json({ error: "Missing text or email" }, { status: 400 });
@@ -122,10 +124,50 @@ export async function POST(req: Request) {
     // Parse the JSON response
     const analysis = JSON.parse(analysisText || "{}");
 
+    // Store analysis result in Vercel Blob Storage
+    let analysisUrl: string | null = null;
+    const analysisId = fileId || `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const analysisData = {
+          id: analysisId,
+          email,
+          analyzedAt: new Date().toISOString(),
+          contractType: analysis.contractType,
+          contractScore: analysis.contractScore,
+          riskLevel: analysis.riskLevel,
+          analysis,
+        };
+
+        const blob = await put(
+          `analyses/${analysisId}/analysis.json`,
+          JSON.stringify(analysisData, null, 2),
+          {
+            access: "public",
+            addRandomSuffix: false,
+            contentType: "application/json",
+          }
+        );
+
+        analysisUrl = blob.url;
+        console.log("[Analyze] Analysis stored in Vercel Blob:", analysisUrl);
+      } catch (blobError) {
+        console.error("[Analyze] Blob storage error:", blobError);
+        // Continue without storing - analysis still works
+      }
+    }
+
     console.log("[Analyze] Analysis parsed successfully");
-    return NextResponse.json({ success: true, analysis });
+    return NextResponse.json({
+      success: true,
+      analysis,
+      analysisId,
+      analysisUrl,
+    });
   } catch (error) {
     console.error("Analysis error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+

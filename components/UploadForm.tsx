@@ -89,16 +89,19 @@ export function UploadForm() {
             });
 
             if (!uploadRes.ok) throw new Error("Upload failed");
-            const { text } = await uploadRes.json();
+            const { text, fileId } = await uploadRes.json();
 
             setUploadProgress(95);
             localStorage.setItem("contract_text", text);
             localStorage.setItem("user_email", email);
+            if (fileId) {
+                localStorage.setItem("file_id", fileId);
+            }
 
             const checkoutRes = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, fileId: "temp-id" }),
+                body: JSON.stringify({ email, fileId: fileId || "temp-id" }),
             });
 
             if (!checkoutRes.ok) throw new Error("Checkout failed");
