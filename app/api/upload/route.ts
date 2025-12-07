@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
 import { extractText } from "unpdf";
+import { put } from "@vercel/blob";
 
 export async function POST(req: Request) {
     try {
@@ -36,11 +37,40 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
         }
 
-        // In a real app, store text in DB and return ID.
-        // For this demo, we return the text to the client to pass to the analyze endpoint later.
-        return NextResponse.json({ text, filename: file.name });
+        // Store file in Vercel Blob Storage
+        let fileUrl: string | null = null;
+        let fileId: string | null = null;
+
+        if (process.env.BLOB_READ_WRITE_TOKEN) {
+            try {
+                // Generate unique file ID
+                fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+                const filename = `uploads/${fileId}/${file.name}`;
+
+                const blob = await put(filename, buffer, {
+                    access: "public",
+                    addRandomSuffix: false,
+                });
+
+                fileUrl = blob.url;
+                console.log("File stored in Vercel Blob:", fileUrl);
+            } catch (blobError) {
+                console.error("Blob storage error:", blobError);
+                // Continue without storing - file processing still works
+            }
+        } else {
+            console.log("BLOB_READ_WRITE_TOKEN not set - file storage disabled");
+        }
+
+        return NextResponse.json({
+            text,
+            filename: file.name,
+            fileId,
+            fileUrl,
+        });
     } catch (error) {
         console.error("Upload error:", error);
         return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 }
+

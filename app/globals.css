@@ -288,6 +288,8 @@ a {
 @media print {
   body {
     background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .no-print {
@@ -300,6 +302,84 @@ a {
     opacity: 1 !important;
     animation: none !important;
     transform: none !important;
+  }
+
+  /* Prevent page breaks inside elements */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  p,
+  li,
+  blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Prevent cards and sections from being split */
+  section,
+  article,
+  .rounded-xl,
+  .rounded-2xl,
+  .rounded-3xl,
+  [class*="Card"],
+  [class*="card"] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Keep headings with their content */
+  h1+*,
+  h2+*,
+  h3+*,
+  h4+* {
+    page-break-before: avoid;
+    break-before: avoid;
+  }
+
+  /* Prevent images from being split */
+  img,
+  svg,
+  canvas {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Ensure lists stay together */
+  ul,
+  ol {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Allow page break before major sections if needed */
+  .page-break-before {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* Ensure proper margins for printing */
+  @page {
+    margin: 1.5cm;
+  }
+
+  /* Hide interactive elements */
+  button:not(.print-visible),
+  .hover-lift:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure backgrounds print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 

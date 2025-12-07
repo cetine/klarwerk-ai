@@ -587,7 +587,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 no-print">
                 <Button
                     onClick={handleDownload}
                     variant="outline"
