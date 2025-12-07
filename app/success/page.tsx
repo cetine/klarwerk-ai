@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { AnalysisResults } from "@/components/AnalysisResults";
+import { trackConversion } from "@/components/GoogleAnalytics";
 
 interface AnalysisData {
     contractType?: string;
@@ -117,9 +118,13 @@ function SuccessContent() {
                 setAnalysis(data.analysis);
                 setStatus("success");
 
+                // Track conversion for Google Ads
+                trackConversion(0.99, "EUR");
+
                 // Clear storage
                 localStorage.removeItem("contract_text");
                 localStorage.removeItem("user_email");
+                localStorage.removeItem("file_id");
             } catch (error) {
                 console.error(error);
                 setStatus("error");
