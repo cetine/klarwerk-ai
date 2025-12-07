@@ -386,15 +386,15 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
                     <CardContent className="pt-6">
                         <div className="space-y-4">
                             {analysis.legalBasis.map((basis, index) => (
-                                <div key={index} className="flex gap-4 p-4 bg-slate-50 rounded-xl">
-                                    <div className="flex-shrink-0">
-                                        <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                            <span className="text-indigo-700 font-bold text-sm">{basis.sections}</span>
+                                <div key={index} className="p-4 bg-slate-50 rounded-xl">
+                                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                                        <div className="inline-flex px-3 py-1.5 bg-indigo-100 rounded-lg flex-shrink-0">
+                                            <span className="text-indigo-700 font-bold text-sm whitespace-nowrap">{basis.sections}</span>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-slate-900">{basis.law}</h4>
-                                        <p className="text-slate-600 text-sm mt-1">{basis.relevance}</p>
+                                        <div className="flex-1">
+                                            <h4 className="font-semibold text-slate-900">{basis.law}</h4>
+                                            <p className="text-slate-600 text-sm mt-1">{basis.relevance}</p>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
