@@ -254,7 +254,7 @@ export function UploadForm() {
                                     ) : (
                                         <span className="flex items-center gap-2">
                                             <Zap className="w-5 h-5" />
-                                            Jetzt analysieren · <span className="line-through text-white/50">€3,99</span> €0,99
+                                            Jetzt analysieren · €3,99
                                         </span>
                                     )}
                                 </Button>
