@@ -26,25 +26,11 @@ export function Pricing() {
                         </div>
 
                         <div className="p-10 text-center border-b border-[#f5f5f7]">
-                            {/* Limited Time Offer Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#ff375f]/10 text-[#ff375f] text-sm font-semibold rounded-full mb-4">
-                                <Tag className="w-4 h-4" />
-                                Nur bis 01.01.2026
-                            </div>
                             <p className="text-[#86868b] font-medium mb-4">Expertenanalyse</p>
                             <div className="flex items-baseline justify-center gap-3 text-[#1d1d1f]">
-                                <span className="text-2xl text-[#86868b] line-through">€3,99</span>
-                                <span className="text-6xl font-semibold text-[#34c759]">€0,99</span>
+                                <span className="text-6xl font-semibold">€3,99</span>
                             </div>
                             <p className="text-[#86868b] mt-2">pro Dokument</p>
-
-                            {/* Coupon Code */}
-                            <div className="mt-6 p-4 bg-gradient-to-r from-[#0071e3]/5 to-[#5856d6]/5 rounded-2xl border border-[#0071e3]/20">
-                                <p className="text-sm text-[#86868b] mb-2">Gutscheincode beim Checkout eingeben:</p>
-                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border-2 border-dashed border-[#0071e3]">
-                                    <code className="text-lg font-bold text-[#0071e3] tracking-wider">Gutschein2025</code>
-                                </div>
-                            </div>
                         </div>
 
                         <div className="p-10">
