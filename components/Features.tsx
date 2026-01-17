@@ -49,7 +49,7 @@ export function Features() {
                         Spezialisierte Technologie
                     </div>
                     <h2 className="text-4xl font-semibold tracking-tight text-[#1d1d1f] sm:text-5xl mb-6">
-                        Warum VertragsKlar?
+                        Die beste Wahl für Ihre Vertragsprüfung
                     </h2>
                     <p className="text-xl text-[#86868b] max-w-2xl mx-auto leading-relaxed">
                         Entwickelt für den deutschen Rechtsraum – mit Technologie,

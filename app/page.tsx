@@ -4,6 +4,7 @@ import { Features } from "@/components/Features";
 import { Pricing } from "@/components/Pricing";
 import { Footer } from "@/components/Footer";
 import { DiscountPopup } from "@/components/DiscountPopup";
+import { FAQ } from "@/components/FAQ";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <AICouncil />
       <Features />
       <Pricing />
+      <FAQ />
       <Footer />
       <DiscountPopup />
     </main>

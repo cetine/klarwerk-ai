@@ -14,14 +14,14 @@ export function Hero() {
 
                     {/* Headline - Apple style large and bold */}
                     <h1 className="text-5xl font-semibold tracking-tight text-[#1d1d1f] sm:text-7xl mb-6 leading-[1.1]">
-                        Verträge verstehen.{" "}
+                        Verträge prüfen.{" "}
                         <span className="gradient-text">Risiken vermeiden.</span>
                     </h1>
 
                     {/* Subheadline - Apple style lighter weight */}
                     <p className="text-xl text-[#86868b] mb-10 max-w-2xl mx-auto leading-relaxed font-normal">
-                        Unser KI-Expertenrat analysiert Ihren Vertrag mit spezialisierten
-                        juristischen Algorithmen – entwickelt nach deutschen Rechtsstandards.
+                        VertragsKlar analysiert <strong>Mietverträge</strong>, <strong>Arbeitsverträge</strong> und AGBs sekundenschnell.
+                        Finden Sie versteckte Klauseln und rechtliche Fallstricke.
                     </p>
 
                     {/* Feature Pills */}
