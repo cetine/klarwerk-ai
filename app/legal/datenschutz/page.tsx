@@ -64,7 +64,7 @@ export default function Datenschutz() {
                                     Enver Cetin, Lärchenstraße 20C, 84435 Lengdorf.
                                 </p>
                                 <p className="text-[#86868b] mt-2">
-                                    Kontakt: <a href="mailto:support@vertragsklar.de" className="text-[#0071e3] hover:underline">support@vertragsklar.de</a>
+                                    Kontakt: <a href="mailto:noreply@vertragsklar.de" className="text-[#0071e3] hover:underline">noreply@vertragsklar.de</a>
                                 </p>
                             </div>
                         </div>
@@ -174,7 +174,7 @@ export default function Datenschutz() {
 
                         <p className="mt-4 text-sm text-[#86868b]">
                             Zur Ausübung dieser Rechte wenden Sie sich bitte an:{" "}
-                            <a href="mailto:support@vertragsklar.de" className="text-[#0071e3] hover:underline">support@vertragsklar.de</a>
+                            <a href="mailto:noreply@vertragsklar.de" className="text-[#0071e3] hover:underline">noreply@vertragsklar.de</a>
                         </p>
                     </div>
 

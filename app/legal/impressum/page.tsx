@@ -44,8 +44,8 @@ export default function Impressum() {
                             </div>
                             <div>
                                 <h2 className="text-xl font-semibold text-[#1d1d1f] mb-3">Kontakt</h2>
-                                <a href="mailto:support@vertragsklar.de" className="text-[#0071e3] hover:underline">
-                                    support@vertragsklar.de
+                                <a href="mailto:noreply@vertragsklar.de" className="text-[#0071e3] hover:underline">
+                                    noreply@vertragsklar.de
                                 </a>
                             </div>
                         </div>
@@ -109,8 +109,8 @@ export default function Impressum() {
                                 </p>
                                 <p className="text-[#1d1d1f] mb-2">
                                     <strong>E-Mail:</strong>{" "}
-                                    <a href="mailto:support@vertragsklar.de" className="text-[#0071e3] hover:underline">
-                                        support@vertragsklar.de
+                                    <a href="mailto:noreply@vertragsklar.de" className="text-[#0071e3] hover:underline">
+                                        noreply@vertragsklar.de
                                     </a>
                                 </p>
                                 <p className="text-[#86868b] text-sm">

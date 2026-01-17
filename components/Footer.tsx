@@ -53,8 +53,8 @@ export function Footer() {
                         <h3 className="font-semibold text-[#1d1d1f] mb-5 text-sm">Kontakt</h3>
                         <ul className="space-y-3 text-sm text-[#86868b]">
                             <li>
-                                <a href="mailto:support@vertragsklar.de" className="hover:text-[#0071e3] transition-colors">
-                                    support@vertragsklar.de
+                                <a href="mailto:noreply@vertragsklar.de" className="hover:text-[#0071e3] transition-colors">
+                                    noreply@vertragsklar.de
                                 </a>
                             </li>
                         </ul>

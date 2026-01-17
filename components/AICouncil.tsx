@@ -112,7 +112,7 @@ export function AICouncil() {
                                 <div className="w-20 h-20 mx-auto mb-5 bg-gradient-to-br from-[#0071e3] to-[#5856d6] rounded-2xl flex items-center justify-center shadow-lg">
                                     <Brain className="w-10 h-10 text-white" />
                                 </div>
-                                <h3 className="text-xl font-semibold text-white mb-2">Leitende KI</h3>
+                                <h3 className="text-xl font-semibold text-white mb-2">Parent AI</h3>
                                 <p className="text-white/50 text-sm">Konsolidiert alle Fachgutachten</p>
 
                                 {showSummary && (
