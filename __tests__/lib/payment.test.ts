@@ -1,15 +1,28 @@
 import { verifyPaidSession, MAX_ANALYSES_PER_SESSION } from '@/lib/payment';
 import { stripe } from '@/lib/stripe';
-import { list, put } from '@vercel/blob';
+import { put } from '@vercel/blob';
 
 jest.mock('@/lib/stripe', () => ({
     stripe: { checkout: { sessions: { retrieve: jest.fn() } } },
 }));
 
 jest.mock('@vercel/blob', () => ({
-    list: jest.fn(),
     put: jest.fn(),
 }));
+
+// Mirrors the real Blob API: a second put to the same pathname with allowOverwrite: false is rejected.
+const alreadyExists = () => new Error('Vercel Blob: This blob already exists, use `allowOverwrite: true` if you want to overwrite it.');
+const fakeStore = (taken: string[] = []) => {
+    const paths = new Set<string>();
+    const takenCount = taken.length;
+    (put as jest.Mock).mockImplementation(async (pathname: string) => {
+        const slot = Number(pathname.split('/').pop());
+        if (paths.has(pathname) || slot <= takenCount) throw alreadyExists();
+        paths.add(pathname);
+        return { url: `https://blob.test/${pathname}` };
+    });
+    return paths;
+};
 
 const retrieve = stripe.checkout.sessions.retrieve as jest.Mock;
 const nowSec = () => Math.floor(Date.now() / 1000);
@@ -79,14 +92,33 @@ describe('verifyPaidSession', () => {
         process.env.BLOB_READ_WRITE_TOKEN = 'test-token';
         retrieve.mockResolvedValue(session());
 
-        (list as jest.Mock).mockResolvedValue({ blobs: new Array(MAX_ANALYSES_PER_SESSION - 1).fill({}) });
+        fakeStore(new Array(MAX_ANALYSES_PER_SESSION - 1).fill('x'));
         expect(await verifyPaidSession('cs_test_123', 'file-1')).toEqual({ ok: true });
-        expect(put).toHaveBeenCalledTimes(1);
-        const [marker] = (put as jest.Mock).mock.calls[0];
-        expect(marker).not.toContain('cs_test_123');
+        const claimed = (put as jest.Mock).mock.calls.at(-1)[0] as string;
+        expect(claimed.endsWith(`/${MAX_ANALYSES_PER_SESSION}`)).toBe(true);
+        expect(claimed).not.toContain('cs_test_123');
 
-        (list as jest.Mock).mockResolvedValue({ blobs: new Array(MAX_ANALYSES_PER_SESSION).fill({}) });
         expect(await verifyPaidSession('cs_test_123', 'file-1')).toMatchObject({ ok: false, status: 429 });
+    });
+
+    it('cannot be exceeded by parallel requests', async () => {
+        process.env.BLOB_READ_WRITE_TOKEN = 'test-token';
+        retrieve.mockResolvedValue(session());
+        fakeStore();
+
+        const results = await Promise.all(
+            Array.from({ length: MAX_ANALYSES_PER_SESSION + 3 }, () => verifyPaidSession('cs_test_123', 'file-1'))
+        );
+        expect(results.filter((r) => r.ok)).toHaveLength(MAX_ANALYSES_PER_SESSION);
+        expect(results.filter((r) => !r.ok && r.status === 429)).toHaveLength(3);
+    });
+
+    it('does not block a paying customer when the usage store is down', async () => {
+        process.env.BLOB_READ_WRITE_TOKEN = 'test-token';
+        retrieve.mockResolvedValue(session());
+        (put as jest.Mock).mockRejectedValue(new Error('Vercel Blob: The service is currently not available.'));
+
+        expect(await verifyPaidSession('cs_test_123', 'file-1')).toEqual({ ok: true });
         expect(put).toHaveBeenCalledTimes(1);
     });
 });

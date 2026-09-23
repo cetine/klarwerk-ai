@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { list, put } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { stripe } from "@/lib/stripe";
 
 // A paid session may be retried a few times (e.g. after a timeout), but not reused indefinitely.
@@ -47,22 +47,27 @@ export async function verifyPaidSession(
     return consumeAnalysisSlot(session.id);
 }
 
+const isAlreadyClaimed = (error: unknown) =>
+    error instanceof Error && error.message.includes("already exists");
+
+// Each session owns fixed slots 1..MAX. Blob rejects a second put to the same pathname
+// server-side, so claiming a slot is atomic and parallel requests cannot exceed the cap.
 async function consumeAnalysisSlot(sessionId: string): Promise<PaymentCheck> {
     if (!process.env.BLOB_READ_WRITE_TOKEN) return { ok: true };
 
     // Hashed so the public blob path never exposes the Stripe session id.
     const key = createHash("sha256").update(sessionId).digest("hex").slice(0, 32);
-    const prefix = `usage/${key}/`;
-    try {
-        const { blobs } = await list({ prefix });
-        if (blobs.length >= MAX_ANALYSES_PER_SESSION) {
-            console.warn("[Payment] Analysis limit reached for session:", sessionId);
-            return fail(429, "Für diese Zahlung wurden bereits alle Analysen durchgeführt.");
+    for (let slot = 1; slot <= MAX_ANALYSES_PER_SESSION; slot++) {
+        try {
+            await put(`usage/${key}/${slot}`, "1", { access: "public", addRandomSuffix: false, allowOverwrite: false });
+            return { ok: true };
+        } catch (error) {
+            if (isAlreadyClaimed(error)) continue;
+            // Counter outage must not block a paying customer; the Stripe check above already passed.
+            console.error("[Payment] Usage counter unavailable:", error instanceof Error ? error.message : error);
+            return { ok: true };
         }
-        await put(`${prefix}${Date.now()}`, "1", { access: "public", addRandomSuffix: true });
-    } catch (error) {
-        // Counter outage must not block a paying customer; the Stripe check above already passed.
-        console.error("[Payment] Usage counter unavailable:", error instanceof Error ? error.message : error);
     }
-    return { ok: true };
+    console.warn("[Payment] Analysis limit reached for session:", sessionId);
+    return fail(429, "Für diese Zahlung wurden bereits alle Analysen durchgeführt.");
 }
