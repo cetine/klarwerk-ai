@@ -73,7 +73,7 @@ function SuccessContent() {
         if (status === "loading") {
             const interval = setInterval(() => {
                 setCurrentStep((prev) => (prev < analysisSteps.length - 1 ? prev + 1 : prev));
-            }, 3000);
+            }, 12000);
             return () => clearInterval(interval);
         }
     }, [status]);
@@ -109,10 +109,19 @@ function SuccessContent() {
                 const res = await fetch("/api/analyze", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text, email, fileId }),
+                    body: JSON.stringify({ text, email, fileId, sessionId }),
                 });
 
-                if (!res.ok) throw new Error("Analyse fehlgeschlagen.");
+                if (!res.ok) {
+                    const body = await res.json().catch(() => ({}));
+                    // Payment problems carry a specific message; everything else falls back to the generic one.
+                    if ([402, 403, 429].includes(res.status) && body.error) {
+                        setStatus("error");
+                        setMessage(body.error);
+                        return;
+                    }
+                    throw new Error("Analyse fehlgeschlagen.");
+                }
 
                 const data = await res.json();
                 setAnalysis(data.analysis);
@@ -212,7 +221,7 @@ function SuccessContent() {
                         })}
                     </div>
                     <p className="text-sm text-slate-500 text-center mt-6">
-                        Dies kann bis zu 30 Sekunden dauern
+                        Die gründliche Prüfung dauert etwa 1 Minute. Bitte schließen Sie dieses Fenster nicht.
                     </p>
                 </CardContent>
             </Card>

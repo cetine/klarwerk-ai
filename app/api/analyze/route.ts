@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
 import { put } from "@vercel/blob";
+import { verifyPaidSession } from "@/lib/payment";
+
+// Reasoning analyses take ~1 min (max ~80 s in benchmarks); the platform default is too short.
+export const maxDuration = 300;
+
+const ANALYSIS_MODEL = "gpt-5.6-luna";
 
 export async function POST(req: Request) {
   try {
-    const { text, email, fileId } = await req.json();
+    const { text, email, fileId, sessionId } = await req.json();
 
     console.log("[Analyze] Starting analysis for:", email);
     console.log("[Analyze] Text length:", text?.length);
@@ -14,10 +20,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing text or email" }, { status: 400 });
     }
 
-    // Analyze with GPT-4o-mini using Chat Completions API
-    console.log("[Analyze] Calling OpenAI Chat Completions API...");
+    const payment = await verifyPaidSession(sessionId, fileId);
+    if (!payment.ok) {
+      return NextResponse.json({ error: payment.error }, { status: payment.status });
+    }
+
+    // Model choice benchmarked 2026-09: gpt-5.6-luna (low) found 100 % of planted defects vs 53 % for gpt-4o-mini.
+    console.log("[Analyze] Calling OpenAI Chat Completions API with", ANALYSIS_MODEL);
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: ANALYSIS_MODEL,
+      reasoning_effort: "low",
       messages: [
         {
           role: "system",
