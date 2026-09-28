@@ -68,6 +68,9 @@ function SuccessContent() {
     const [message, setMessage] = useState("Zahlung wird überprüft...");
     const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
     const [currentStep, setCurrentStep] = useState(0);
+    // Bumped by the retry button to re-run the analysis with the contract still in localStorage.
+    const [attempt, setAttempt] = useState(0);
+    const [canRetry, setCanRetry] = useState(false);
 
     useEffect(() => {
         if (status === "loading") {
@@ -136,13 +139,27 @@ function SuccessContent() {
                 localStorage.removeItem("file_id");
             } catch (error) {
                 console.error(error);
+                // Contract data is only cleared on success, so an interrupted analysis can be retried.
+                const retryable = !!localStorage.getItem("contract_text") && !!localStorage.getItem("user_email");
+                setCanRetry(retryable);
                 setStatus("error");
-                setMessage("Es gab ein Problem bei der Analyse. Bitte kontaktieren Sie den Support.");
+                setMessage(
+                    retryable
+                        ? "Die Analyse wurde unterbrochen. Ihre Zahlung ist gespeichert – bitte versuchen Sie es erneut."
+                        : "Es gab ein Problem bei der Analyse. Bitte kontaktieren Sie den Support."
+                );
             }
         };
 
         analyzeContract();
-    }, [sessionId]);
+    }, [sessionId, attempt]);
+
+    const retry = () => {
+        setCanRetry(false);
+        setCurrentStep(0);
+        setStatus("loading");
+        setAttempt((n) => n + 1);
+    };
 
     if (status === "loading") {
         return (
@@ -241,6 +258,11 @@ function SuccessContent() {
                 </CardHeader>
                 <CardContent>
                     <p className="text-slate-600 mb-6">{message}</p>
+                    {canRetry && (
+                        <Button onClick={retry} className="w-full mb-3">
+                            Erneut versuchen
+                        </Button>
+                    )}
                     <Button asChild variant="outline" className="w-full">
                         <Link href="/">Zurück zur Startseite</Link>
                     </Button>

@@ -2,6 +2,7 @@ import { createMocks } from 'node-mocks-http';
 import { POST } from '@/app/api/analyze/route';
 import { openai } from '@/lib/openai';
 import { verifyPaidSession } from '@/lib/payment';
+import { put } from '@vercel/blob';
 
 // Mock OpenAI
 jest.mock('@/lib/openai', () => ({
@@ -12,6 +13,10 @@ jest.mock('@/lib/openai', () => ({
             },
         },
     },
+}));
+
+jest.mock('@vercel/blob', () => ({
+    put: jest.fn().mockResolvedValue({ url: 'https://blob.test/analysis.json' }),
 }));
 
 jest.mock('@/lib/payment', () => ({
@@ -149,5 +154,23 @@ describe('/api/analyze', () => {
             model: 'gpt-5.6-luna',
             reasoning_effort: 'low',
         }));
+    });
+
+    it('overwrites the stored analysis when a paid customer retries the same contract', async () => {
+        const originalToken = process.env.BLOB_READ_WRITE_TOKEN;
+        process.env.BLOB_READ_WRITE_TOKEN = 'test-token';
+        create.mockResolvedValue({ choices: [{ message: { content: JSON.stringify({ contractScore: 50, riskLevel: 'yellow' }) } }] });
+        const { req } = createMocks({ method: 'POST' });
+        req.json = jest.fn().mockResolvedValue({ text: 'Vertrag', email: 'a@b.de', fileId: 'file-1', sessionId: 'cs_x' });
+
+        const response = await POST(req as any);
+        process.env.BLOB_READ_WRITE_TOKEN = originalToken;
+
+        expect(response.status).toBe(200);
+        expect(put).toHaveBeenCalledWith(
+            'analyses/file-1/analysis.json',
+            expect.any(String),
+            expect.objectContaining({ addRandomSuffix: false, allowOverwrite: true })
+        );
     });
 });

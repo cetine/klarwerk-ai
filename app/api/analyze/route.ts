@@ -158,6 +158,8 @@ export async function POST(req: Request) {
           {
             access: "public",
             addRandomSuffix: false,
+            // A paid customer may retry the same contract; keep the latest analysis.
+            allowOverwrite: true,
             contentType: "application/json",
           }
         );
