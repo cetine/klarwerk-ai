@@ -48,22 +48,6 @@ section {
   scroll-margin-top: 80px;
 }
 
-/* Premium glass panel */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-}
-
-/* Dark glass panel */
-.glass-panel-dark {
-  background: rgba(29, 29, 31, 0.72);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
 
 /* Apple-like smooth animations */
 @keyframes fadeIn {
@@ -114,17 +98,6 @@ section {
   }
 }
 
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
-}
 
 @keyframes pulse-subtle {
 
@@ -138,33 +111,6 @@ section {
   }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient {
-  animation: gradient 3s ease infinite;
-}
 
 /* Animation utilities */
 .animate-fadeIn {
@@ -183,105 +129,18 @@ section {
   animation: slideInFromBottom 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
 
-/* Staggered animations - Apple style with smoother timing */
-.stagger-children>* {
-  opacity: 0;
-  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.stagger-children>*:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.stagger-children>*:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.stagger-children>*:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.stagger-children>*:nth-child(4) {
-  animation-delay: 0.4s;
-}
-
-.stagger-children>*:nth-child(5) {
-  animation-delay: 0.5s;
-}
-
-.stagger-children>*:nth-child(6) {
-  animation-delay: 0.6s;
-}
-
-.stagger-children>*:nth-child(7) {
-  animation-delay: 0.7s;
-}
-
-.stagger-children>*:nth-child(8) {
-  animation-delay: 0.8s;
-}
-
-.stagger-children>*:nth-child(9) {
-  animation-delay: 0.9s;
-}
-
-.stagger-children>*:nth-child(10) {
-  animation-delay: 1.0s;
-}
-
-/* Smooth hover transitions - Apple style */
-.hover-lift {
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
 
 /* Smooth button transitions */
 button,
 a {
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: color 0.2s ease;
 }
 
 /* Apple-like focus states */
 *:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* Smooth card hover */
-.card-hover {
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.card-hover:hover {
-  transform: scale(1.02) translateY(-2px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-}
-
-/* Apple-like gradient text */
-.gradient-text {
-  background: linear-gradient(90deg, #0071e3, #5856d6, #af52de);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Shimmer loading effect */
-.shimmer {
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.5) 50%,
-      rgba(255, 255, 255, 0) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
 }
 
 /* Print styles */
@@ -396,5 +255,229 @@ a {
 
   html {
     scroll-behavior: auto;
+  }
+}
+/* ------------------------------------------------------------------
+   Die Randnotiz – landing page world (see DESIGN.md)
+   ------------------------------------------------------------------ */
+@theme {
+  --color-desk: #f2f3f5;
+  --color-sheet: #ffffff;
+  --color-ink: #14161a;
+  --color-ink-soft: #454b53;
+  --color-rule: #d5d9de;
+  --color-marker-yellow: #ffe14d;
+  --color-marker-red: #ff8a98;
+  --color-marker-green: #a6e8a0;
+  --color-action-hover: #2b3038;
+}
+
+@theme inline {
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --font-ui: var(--font-archivo), system-ui, sans-serif;
+  --font-contract: var(--font-tinos), "Times New Roman", serif;
+}
+
+.vk {
+  background: var(--color-desk);
+  color: var(--color-ink);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-feature-settings: "kern" 1, "tnum" 1;
+}
+
+.vk-narrow {
+  font-variation-settings: "wdth" 85;
+}
+
+.vk-balance {
+  text-wrap: balance;
+}
+
+.vk :focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--color-marker-yellow);
+}
+
+.vk-sheet {
+  background: var(--color-sheet);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 1px rgba(20, 22, 26, 0.06),
+    0 18px 40px -18px rgba(20, 22, 26, 0.28);
+}
+
+/* Highlighter: a slightly uneven swipe behind the text, never a box */
+.vk-mark {
+  --m: var(--color-marker-yellow);
+  color: inherit;
+  background-color: transparent;
+  background-image: linear-gradient(
+    102deg,
+    transparent 0.15em,
+    var(--m) 0.3em,
+    var(--m) calc(100% - 0.35em),
+    transparent calc(100% - 0.1em)
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 72%;
+  background-position: 0 70%;
+  padding: 0 0.2em;
+  margin: 0 -0.1em;
+  border-radius: 0.25em 0.4em 0.3em 0.35em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  mix-blend-mode: multiply;
+}
+
+.vk-mark-word {
+  padding: 0 0.08em;
+  margin: 0;
+}
+
+.vk-mark[data-risk="red"] {
+  --m: var(--color-marker-red);
+}
+
+.vk-mark[data-risk="yellow"] {
+  --m: var(--color-marker-yellow);
+}
+
+.vk-mark[data-risk="green"] {
+  --m: var(--color-marker-green);
+}
+
+/* The one authored motion: hero highlights are drawn once, left to right */
+.vk-draw {
+  background-size: 0% 72%;
+  animation: vk-draw 700ms var(--ease-out-strong) forwards;
+  animation-delay: var(--d, 350ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vk-draw {
+    animation: none;
+    background-size: 100% 72%;
+  }
+}
+
+@keyframes vk-draw {
+  to {
+    background-size: 100% 72%;
+  }
+}
+
+.vk-swatch {
+  display: inline-block;
+  width: 1.5rem;
+  height: 0.7rem;
+  border-radius: 0.2rem 0.35rem 0.25rem 0.3rem;
+  background: var(--m);
+}
+
+/* ---------- Motion: attention + reveals (Randnotiz) ---------- */
+
+/* Press feedback on every ink button */
+.vk-press {
+  transition:
+    transform 160ms var(--ease-out-strong),
+    background-color 160ms ease;
+}
+.vk-press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Arrow that leans toward the next step */
+.vk-arrow {
+  transition: transform 200ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .vk-press:hover .vk-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* Idle nudge on the upload icon: three soft lifts, then rest. Stops once touched. */
+.vk-nudge {
+  animation: vk-nudge 3.2s var(--ease-in-out-strong) 2.4s 3 both;
+}
+.vk-dropzone:hover .vk-nudge,
+.vk-dropzone:focus-visible .vk-nudge {
+  animation: none;
+}
+@keyframes vk-nudge {
+  0%, 22%, 100% { transform: translateY(0); }
+  8% { transform: translateY(-6px); }
+  15% { transform: translateY(-2px); }
+}
+
+/* Underline drawn from the left on hover */
+.vk-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition:
+    background-size 220ms var(--ease-out-strong),
+    color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .vk-link:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/* Scroll reveal: visible by default; only elements armed by JS start hidden */
+[data-reveal][data-armed] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-reveal][data-armed][data-visible] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 520ms var(--ease-out-strong),
+    transform 520ms var(--ease-out-strong);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Highlights in the sample report draw when their clause arrives */
+[data-armed] .vk-mark[data-draw-on-view],
+.vk-mark[data-draw-on-view][data-armed] {
+  background-size: 0% 72%;
+}
+[data-visible] .vk-mark[data-draw-on-view],
+.vk-mark[data-draw-on-view][data-visible] {
+  background-size: 100% 72%;
+  transition: background-size 700ms var(--ease-out-strong);
+  transition-delay: calc(var(--reveal-delay, 0ms) + 250ms);
+}
+
+/* Routing-slip checks stamp in one after another */
+[data-armed] .vk-stamp {
+  opacity: 0;
+  transform: scale(0.9);
+}
+[data-visible] .vk-stamp {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 260ms var(--ease-out-strong),
+    transform 260ms var(--ease-out-strong);
+  transition-delay: calc(var(--stamp-delay, 0ms) + 300ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vk-nudge {
+    animation: none;
+  }
+  [data-reveal][data-armed] {
+    transform: none;
+  }
+  [data-armed] .vk-mark[data-draw-on-view],
+  [data-armed] .vk-stamp {
+    background-size: 100% 72%;
+    transform: none;
   }
 }

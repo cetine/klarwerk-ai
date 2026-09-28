@@ -1,298 +1,272 @@
 "use client";
 
 import * as React from "react";
-import { UploadCloud, FileText, X, CheckCircle, Shield, Zap, Lock, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FileText, Loader2, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const MAX_BYTES = 50 * 1024 * 1024;
+const ALLOWED_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+];
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
+const EASE_IN_OUT = "cubic-bezier(0.77, 0, 0.175, 1)";
+
+function prefersReducedMotion() {
+    return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/** Short horizontal shake: "this field needs you". Feedback on a real error only. */
+function shake(el: HTMLElement | null) {
+    if (!el || prefersReducedMotion()) return;
+    el.animate(
+        [
+            { transform: "translateX(0)" },
+            { transform: "translateX(-6px)" },
+            { transform: "translateX(6px)" },
+            { transform: "translateX(-4px)" },
+            { transform: "translateX(4px)" },
+            { transform: "translateX(0)" },
+        ],
+        { duration: 320, easing: EASE_IN_OUT }
+    );
+}
+
+/** One soft swell of the pay button once a file is ready: the next step is here. */
+function announceReady(el: HTMLElement | null) {
+    if (!el) return;
+    el.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    if (prefersReducedMotion()) return;
+    el.animate(
+        [{ transform: "scale(1)" }, { transform: "scale(1.03)" }, { transform: "scale(1)" }],
+        { duration: 420, easing: EASE_OUT, delay: 180 }
+    );
+}
+
+function formatSize(bytes: number) {
+    return bytes < 1024 * 1024
+        ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+        : `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+}
+
+function fileProblem(file: File): string | null {
+    if (file.size > MAX_BYTES) return "Die Datei ist größer als 50 MB. Bitte eine kleinere Datei wählen.";
+    if (!ALLOWED_TYPES.includes(file.type)) return "Dieses Format können wir nicht lesen. Bitte PDF, DOC, DOCX oder TXT hochladen.";
+    return null;
+}
 
 export function UploadForm() {
     const [isDragging, setIsDragging] = React.useState(false);
     const [file, setFile] = React.useState<File | null>(null);
     const [email, setEmail] = React.useState("");
-    const [isUploading, setIsUploading] = React.useState(false);
-    const [uploadProgress, setUploadProgress] = React.useState(0);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
+    const [invalidField, setInvalidField] = React.useState<"file" | "email" | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const fileButtonRef = React.useRef<HTMLButtonElement>(null);
+    const emailRef = React.useRef<HTMLInputElement>(null);
+    const submitRef = React.useRef<HTMLButtonElement>(null);
+    const fileCardRef = React.useRef<HTMLDivElement>(null);
 
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
+    const acceptFile = (candidate: File) => {
+        const problem = fileProblem(candidate);
+        setError(problem);
+        if (problem) {
+            shake(fileButtonRef.current ?? fileCardRef.current);
+            return;
+        }
+        setFile(candidate);
+        requestAnimationFrame(() => announceReady(submitRef.current));
     };
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            validateAndSetFile(e.dataTransfer.files[0]);
-        }
+        const dropped = e.dataTransfer.files?.[0];
+        if (dropped) acceptFile(dropped);
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            validateAndSetFile(e.target.files[0]);
-        }
-    };
-
-    const validateAndSetFile = (file: File) => {
-        if (file.size > 50 * 1024 * 1024) {
-            alert("Datei ist zu groß (Max 50MB)");
-            return;
-        }
-        const allowedTypes = [
-            "application/pdf",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/plain",
-        ];
-        if (!allowedTypes.includes(file.type)) {
-            alert("Ungültiges Dateiformat. Bitte PDF, DOC, DOCX oder TXT hochladen.");
-            return;
-        }
-        setFile(file);
+        const picked = e.target.files?.[0];
+        if (picked) acceptFile(picked);
     };
 
     const removeFile = () => {
         setFile(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+        setError(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file || !email) return;
+        if (!file) {
+            setError("Bitte zuerst Ihren Vertrag auswählen.");
+            setInvalidField("file");
+            fileButtonRef.current?.focus();
+            shake(fileButtonRef.current);
+            return;
+        }
+        if (!EMAIL_PATTERN.test(email.trim())) {
+            setError("Bitte eine vollständige E-Mail-Adresse eingeben, z. B. name@beispiel.de.");
+            setInvalidField("email");
+            emailRef.current?.focus();
+            shake(emailRef.current);
+            return;
+        }
+        setInvalidField(null);
 
-        setIsUploading(true);
-        setUploadProgress(0);
-
-        const progressInterval = setInterval(() => {
-            setUploadProgress((prev) => {
-                if (prev >= 90) {
-                    clearInterval(progressInterval);
-                    return 90;
-                }
-                return prev + 10;
-            });
-        }, 200);
+        setIsSubmitting(true);
+        setError(null);
 
         try {
             const formData = new FormData();
             formData.append("file", file);
 
-            const uploadRes = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!uploadRes.ok) throw new Error("Upload failed");
+            const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+            if (!uploadRes.ok) throw new Error("upload");
             const { text, fileId } = await uploadRes.json();
 
-            setUploadProgress(95);
             localStorage.setItem("contract_text", text);
-            localStorage.setItem("user_email", email);
-            if (fileId) {
-                localStorage.setItem("file_id", fileId);
-            }
+            localStorage.setItem("user_email", email.trim());
+            if (fileId) localStorage.setItem("file_id", fileId);
 
             const checkoutRes = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, fileId: fileId || "temp-id" }),
+                body: JSON.stringify({ email: email.trim(), fileId: fileId || "temp-id" }),
             });
-
-            if (!checkoutRes.ok) throw new Error("Checkout failed");
+            if (!checkoutRes.ok) throw new Error("checkout");
             const { url } = await checkoutRes.json();
 
-            setUploadProgress(100);
-            clearInterval(progressInterval);
             window.location.href = url;
-        } catch (error) {
-            console.error(error);
-            clearInterval(progressInterval);
-            alert("Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.");
-            setIsUploading(false);
-            setUploadProgress(0);
+        } catch (err) {
+            console.error(err);
+            const step = err instanceof Error ? err.message : "";
+            setError(
+                step === "upload"
+                    ? "Die Datei konnte nicht gelesen werden. Ist es eine eingescannte PDF ohne Text? Bitte eine andere Datei versuchen."
+                    : "Die Zahlungsseite konnte nicht geöffnet werden. Bitte noch einmal versuchen. Es wurde nichts abgebucht."
+            );
+            setIsSubmitting(false);
         }
     };
 
-    const getFileIcon = (type: string) => {
-        if (type.includes("pdf")) return "📄";
-        if (type.includes("word") || type.includes("document")) return "📝";
-        if (type.includes("text")) return "📃";
-        return "📎";
-    };
-
     return (
-        <div className="w-full max-w-lg mx-auto">
-            {/* Apple-style card with glass effect */}
-            <div className={cn(
-                "glass-panel rounded-3xl transition-all duration-500 overflow-hidden",
-                isDragging && "scale-[1.02]"
-            )}>
-                <div className="p-8">
-                    {!file ? (
-                        <div
-                            className={cn(
-                                "relative flex flex-col items-center justify-center py-14 px-6 transition-all duration-500 rounded-2xl cursor-pointer",
-                                isDragging
-                                    ? "bg-[#0071e3]/5 border-2 border-[#0071e3]/30"
-                                    : "bg-[#f5f5f7] border-2 border-dashed border-[#d2d2d7] hover:border-[#0071e3]/40 hover:bg-[#0071e3]/[0.02]"
-                            )}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            {/* Upload Icon */}
-                            <div className={cn(
-                                "relative mb-6 transition-all duration-500",
-                                isDragging && "scale-110 -translate-y-2"
-                            )}>
-                                <div className="w-16 h-16 bg-[#0071e3] rounded-2xl flex items-center justify-center shadow-lg shadow-[#0071e3]/25">
-                                    <UploadCloud className={cn(
-                                        "w-8 h-8 text-white transition-transform duration-300",
-                                        isDragging && "animate-bounce"
-                                    )} />
-                                </div>
-                            </div>
+        <form onSubmit={handleSubmit} noValidate className="w-full">
+            <input
+                type="file"
+                ref={fileInputRef}
+                id="contract-file"
+                className="sr-only"
+                accept=".pdf,.doc,.docx,.txt"
+                onChange={handleFileChange}
+                tabIndex={-1}
+                aria-hidden
+            />
 
-                            <h3 className="text-xl font-semibold text-[#1d1d1f] mb-2">
-                                {isDragging ? "Jetzt loslassen" : "Vertrag hochladen"}
-                            </h3>
-                            <p className="text-[#86868b] text-center mb-2 text-sm">
-                                Ziehen Sie Ihre Datei hierher oder{" "}
-                                <span className="text-[#0071e3] font-medium">durchsuchen</span>
-                            </p>
-                            <p className="text-xs text-[#86868b]/60 flex items-center gap-2">
-                                PDF, DOCX, TXT • Max 50MB
-                            </p>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                className="hidden"
-                                accept=".pdf,.doc,.docx,.txt"
-                                onChange={handleFileChange}
-                            />
-                        </div>
-                    ) : (
-                        <div className="animate-fadeIn">
-                            {/* File Preview */}
-                            <div className="relative bg-[#34c759]/5 p-5 rounded-2xl mb-6 border border-[#34c759]/20">
-                                <div className="absolute top-4 right-4">
-                                    <CheckCircle className="w-5 h-5 text-[#34c759]" />
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    <div className="text-4xl">{getFileIcon(file.type)}</div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-[#1d1d1f] truncate">
-                                            {file.name}
-                                        </p>
-                                        <p className="text-sm text-[#34c759] flex items-center gap-1">
-                                            <Sparkles className="w-3 h-3" />
-                                            Bereit zur Analyse
-                                        </p>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={removeFile}
-                                        className="text-[#86868b] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10 rounded-full transition-all duration-300"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </Button>
-                                </div>
-                            </div>
-
-                            <form onSubmit={handleSubmit} className="space-y-5">
-                                <div>
-                                    <label
-                                        htmlFor="email"
-                                        className="block text-sm font-medium text-[#1d1d1f] mb-2"
-                                    >
-                                        Wohin sollen wir die Analyse senden?
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type="email"
-                                            id="email"
-                                            required
-                                            className="w-full px-4 py-4 bg-[#f5f5f7] border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0071e3] text-[#1d1d1f] text-base transition-all duration-300 placeholder:text-[#86868b]"
-                                            placeholder="ihre@email.de"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                        />
-                                        {email && email.includes("@") && (
-                                            <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#34c759]" />
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* CTA Button - Apple style */}
-                                <Button
-                                    type="submit"
-                                    className={cn(
-                                        "w-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-semibold py-7 text-lg rounded-xl transition-all duration-300",
-                                        isUploading && "opacity-90"
-                                    )}
-                                    disabled={isUploading}
-                                >
-                                    {isUploading ? (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <span>Wird vorbereitet...</span>
-                                            <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-white rounded-full transition-all duration-300"
-                                                    style={{ width: `${uploadProgress}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <span className="flex items-center gap-2">
-                                            <Zap className="w-5 h-5" />
-                                            Jetzt analysieren · €3,99
-                                        </span>
-                                    )}
-                                </Button>
-
-                                {/* Trust Indicators */}
-                                <div className="flex items-center justify-center gap-6 pt-2">
-                                    <div className="flex items-center gap-1.5 text-xs text-[#86868b]">
-                                        <Lock className="w-3.5 h-3.5" />
-                                        <span>Sichere Zahlung</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-xs text-[#86868b]">
-                                        <Shield className="w-3.5 h-3.5" />
-                                        <span>DSGVO-konform</span>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+            {!file ? (
+                <button
+                    type="button"
+                    ref={fileButtonRef}
+                    aria-invalid={invalidField === "file" || undefined}
+                    aria-describedby={invalidField === "file" ? "upload-error" : undefined}
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    className={cn(
+                        "vk-dropzone flex w-full flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed px-5 py-7 text-center transition-colors sm:py-9",
+                        isDragging ? "border-ink bg-desk" : "border-ink/60 bg-desk/60 hover:border-ink hover:bg-desk"
                     )}
+                >
+                    <span className="vk-nudge flex h-14 w-14 items-center justify-center rounded-md bg-ink text-sheet">
+                        <Upload className="h-6 w-6" aria-hidden />
+                    </span>
+                    <span>
+                        <span className="block text-[1.1875rem] font-bold text-ink">
+                            {isDragging ? "Loslassen zum Hochladen" : "Vertrag auswählen"}
+                        </span>
+                        <span className="mt-1 block text-sm text-ink-soft">
+                            oder hierher ziehen · PDF, DOC, DOCX, TXT · bis 50 MB
+                        </span>
+                    </span>
+                </button>
+            ) : (
+                <div ref={fileCardRef} className="flex items-center gap-4 rounded-md border border-ink bg-sheet px-5 py-4">
+                    <FileText className="h-6 w-6 shrink-0 text-ink" aria-hidden />
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-ink">{file.name}</p>
+                        <p className="text-sm text-ink-soft">{formatSize(file.size)} · bereit</p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={removeFile}
+                        disabled={isSubmitting}
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-soft transition-colors hover:bg-desk hover:text-ink disabled:opacity-40"
+                        aria-label="Datei entfernen"
+                    >
+                        <X className="h-5 w-5" aria-hidden />
+                    </button>
                 </div>
+            )}
+
+            <div className="mt-4">
+                <label htmlFor="email" className="block text-[0.9375rem] font-semibold text-ink">
+                    E-Mail-Adresse <span className="font-normal text-ink-soft">(für die Zahlungsquittung)</span>
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    ref={emailRef}
+                    aria-invalid={invalidField === "email" || undefined}
+                    aria-describedby={invalidField === "email" ? "upload-error" : undefined}
+                    autoComplete="email"
+                    inputMode="email"
+                    required
+                    placeholder="name@beispiel.de"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-2 h-[52px] w-full rounded-md border border-ink-soft bg-sheet px-4 text-base text-ink placeholder:text-ink-soft/80 focus:border-ink"
+                />
             </div>
 
-            {/* Features below */}
-            <div className="mt-8 grid grid-cols-3 gap-3">
-                {[
-                    { icon: "⚡", label: "< 2 Minuten", sublabel: "Schnelle Analyse" },
-                    { icon: "🔒", label: "Auto-Löschung", sublabel: "Nach 24 Stunden" },
-                    { icon: "🇩🇪", label: "Made in Germany", sublabel: "Deutsche Standards" },
-                ].map((feature, index) => (
-                    <div
-                        key={index}
-                        className="text-center p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-[#d2d2d7]/50 hover-lift"
-                    >
-                        <div className="text-2xl mb-1">{feature.icon}</div>
-                        <div className="text-sm font-semibold text-[#1d1d1f]">{feature.label}</div>
-                        <div className="text-xs text-[#86868b]">{feature.sublabel}</div>
-                    </div>
-                ))}
-            </div>
-        </div>
+            {error && (
+                <p id="upload-error" role="alert" className="mt-4 text-[0.9375rem] font-medium text-ink">
+                    <span className="vk-mark" data-risk="red">Hinweis:</span> {error}
+                </p>
+            )}
+
+            <button
+                type="submit"
+                ref={submitRef}
+                disabled={isSubmitting}
+                className="vk-press mt-5 inline-flex h-14 w-full items-center justify-center gap-3 rounded-md bg-ink px-6 text-[1.0625rem] font-semibold text-sheet hover:bg-action-hover disabled:cursor-wait disabled:bg-action-hover"
+            >
+                {isSubmitting ? (
+                    <>
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                        Datei wird gelesen …
+                    </>
+                ) : (
+                    <>
+                        Prüfen lassen <span className="font-normal opacity-80">·</span> 3,99 €
+                        <span aria-hidden className="vk-arrow">→</span>
+                    </>
+                )}
+            </button>
+
+            <p className="mt-3 text-sm leading-[1.45] text-ink-soft">
+                Kein Konto, kein Abo. Erst Upload, dann Zahlung über Stripe, danach erscheint Ihr Bericht hier im Browser.{" "}
+                <a href="/legal/agb" className="underline underline-offset-2 hover:text-ink">AGB</a>
+                {" · "}
+                <a href="/legal/datenschutz" className="underline underline-offset-2 hover:text-ink">Datenschutz</a>
+            </p>
+        </form>
     );
 }

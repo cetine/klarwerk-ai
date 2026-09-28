@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { ConsentBanner } from "@/components/ConsentBanner";
+import { archivo, tinos } from "./fonts";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -80,7 +81,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900`}
+        className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} ${tinos.variable} antialiased bg-slate-50 text-slate-900`}
       >
         <script
           type="application/ld+json"
@@ -96,12 +97,7 @@ export default function RootLayout({
                 "price": "3.99",
                 "priceCurrency": "EUR"
               },
-              "description": "KI-gestützte Vertragsanalyse für deutsche Verträge.",
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.8",
-                "ratingCount": "1250"
-              }
+              "description": "KI-gestützte Vertragsanalyse für deutsche Verträge."
             }),
           }}
         />
