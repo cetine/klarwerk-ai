@@ -1,6 +1,8 @@
 import { createMocks } from 'node-mocks-http';
 import { POST } from '@/app/api/analyze/route';
 import { openai } from '@/lib/openai';
+import { verifyPaidSession } from '@/lib/payment';
+import { put } from '@vercel/blob';
 
 // Mock OpenAI
 jest.mock('@/lib/openai', () => ({
@@ -13,7 +15,37 @@ jest.mock('@/lib/openai', () => ({
     },
 }));
 
+jest.mock('@vercel/blob', () => ({
+    put: jest.fn().mockResolvedValue({ url: 'https://blob.test/analysis.json' }),
+}));
+
+jest.mock('@/lib/payment', () => ({
+    verifyPaidSession: jest.fn(),
+}));
+
+const create = openai.chat.completions.create as jest.Mock;
+const verify = verifyPaidSession as jest.Mock;
+
 describe('/api/analyze', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        verify.mockResolvedValue({ ok: true });
+    });
+
+    it('refuses to analyze without a verified payment and never calls OpenAI', async () => {
+        verify.mockResolvedValue({ ok: false, status: 402, error: 'Zahlung konnte nicht bestätigt werden.' });
+        const { req } = createMocks({ method: 'POST' });
+        req.json = jest.fn().mockResolvedValue({ text: 'Vertrag', email: 'a@b.de', fileId: 'file-1', sessionId: 'cs_x' });
+
+        const response = await POST(req as any);
+        const data = await response.json();
+
+        expect(response.status).toBe(402);
+        expect(data.error).toBe('Zahlung konnte nicht bestätigt werden.');
+        expect(verify).toHaveBeenCalledWith('cs_x', 'file-1');
+        expect(create).not.toHaveBeenCalled();
+    });
+
     it('should return 400 if text or email is missing', async () => {
         const { req } = createMocks({
             method: 'POST',
@@ -103,6 +135,8 @@ describe('/api/analyze', () => {
         req.json = jest.fn().mockResolvedValue({
             text: 'Contract text',
             email: 'test@example.com',
+            fileId: 'file-1',
+            sessionId: 'cs_test_123',
         });
 
         const response = await POST(req as any);
@@ -116,5 +150,27 @@ describe('/api/analyze', () => {
         expect(data.analysis.positiveAspects).toHaveLength(1);
         expect(data.analysis.riskMatrix).toBeDefined();
         expect(data.analysis.negotiationPoints).toHaveLength(1);
+        expect(create).toHaveBeenCalledWith(expect.objectContaining({
+            model: 'gpt-5.6-luna',
+            reasoning_effort: 'low',
+        }));
+    });
+
+    it('overwrites the stored analysis when a paid customer retries the same contract', async () => {
+        const originalToken = process.env.BLOB_READ_WRITE_TOKEN;
+        process.env.BLOB_READ_WRITE_TOKEN = 'test-token';
+        create.mockResolvedValue({ choices: [{ message: { content: JSON.stringify({ contractScore: 50, riskLevel: 'yellow' }) } }] });
+        const { req } = createMocks({ method: 'POST' });
+        req.json = jest.fn().mockResolvedValue({ text: 'Vertrag', email: 'a@b.de', fileId: 'file-1', sessionId: 'cs_x' });
+
+        const response = await POST(req as any);
+        process.env.BLOB_READ_WRITE_TOKEN = originalToken;
+
+        expect(response.status).toBe(200);
+        expect(put).toHaveBeenCalledWith(
+            'analyses/file-1/analysis.json',
+            expect.any(String),
+            expect.objectContaining({ addRandomSuffix: false, allowOverwrite: true })
+        );
     });
 });
