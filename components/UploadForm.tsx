@@ -136,7 +136,8 @@ export function UploadForm() {
             const checkoutRes = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: email.trim(), fileId: fileId || "temp-id" }),
+                // Only bind the payment to a real stored file; /api/analyze rejects a session whose fileId does not match.
+                body: JSON.stringify({ email: email.trim(), ...(fileId ? { fileId } : {}) }),
             });
             if (!checkoutRes.ok) throw new Error("checkout");
             const { url } = await checkoutRes.json();
