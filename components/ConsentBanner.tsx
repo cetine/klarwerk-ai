@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export function ConsentBanner() {
     const [showBanner, setShowBanner] = useState(false);
@@ -44,32 +42,33 @@ export function ConsentBanner() {
     if (!showBanner) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6 bg-white/80 backdrop-blur-xl border-t border-[#d2d2d7] animate-in slide-in-from-bottom-full duration-500">
-            <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="text-center md:text-left space-y-2">
-                    <h3 className="text-lg font-semibold text-[#1d1d1f]">
-                        Wir respektieren Ihre Privatsphäre
-                    </h3>
-                    <p className="text-sm text-[#86868b] max-w-2xl leading-relaxed">
-                        Wir nutzen Cookies und ähnliche Technologien, um Ihnen ein optimales Erlebnis zu bieten
-                        und unsere Dienste zu verbessern. Sie können Ihre Einwilligung jederzeit widerrufen.
-                    </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    <Button
-                        variant="ghost"
+        <div
+            role="region"
+            aria-label="Cookie-Einstellungen"
+            className="vk fixed inset-x-0 bottom-0 z-50 border-t border-ink bg-sheet px-4 py-3 md:px-8 md:py-4"
+        >
+            <div className="mx-auto flex max-w-[1200px] flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-8">
+                <p className="max-w-[62ch] text-sm leading-[1.45] text-ink-soft">
+                    Google Analytics nur mit Ihrer Einwilligung, jederzeit widerrufbar.{" "}
+                    <a href="/legal/datenschutz" className="underline underline-offset-2 hover:text-ink">
+                        Datenschutz
+                    </a>
+                </p>
+                <div className="grid shrink-0 grid-cols-2 gap-2">
+                    <button
+                        type="button"
                         onClick={handleDecline}
-                        className="rounded-full px-6 hover:bg-[#1d1d1f]/5 text-[#1d1d1f]"
+                        className="vk-press inline-flex min-h-11 items-center justify-center rounded-md border border-ink px-5 text-[0.9375rem] font-semibold text-ink transition-colors hover:bg-desk"
                     >
                         Ablehnen
-                    </Button>
-                    <Button
+                    </button>
+                    <button
+                        type="button"
                         onClick={handleAccept}
-                        className="rounded-full px-8 bg-[#0071e3] hover:bg-[#0077ed] text-white font-medium transition-all"
+                        className="inline-flex min-h-11 items-center justify-center rounded-md border border-ink bg-ink px-5 text-[0.9375rem] font-semibold text-sheet transition-colors hover:bg-action-hover"
                     >
-                        Alle akzeptieren
-                    </Button>
+                        Akzeptieren
+                    </button>
                 </div>
             </div>
         </div>
