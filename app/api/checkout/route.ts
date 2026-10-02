@@ -5,8 +5,15 @@ export async function POST(req: Request) {
     try {
         const { email, fileId } = await req.json();
 
-        // Get Price ID from environment or use default
-        const priceId = process.env.STRIPE_PRICE_ID || "price_1RsjNR2aYP1cJiwgRm28FUpk";
+        // No fallback: a hardcoded ID would silently charge an outdated price (see lib/pricing.ts).
+        const priceId = process.env.STRIPE_PRICE_ID;
+        if (!priceId) {
+            console.error("STRIPE_PRICE_ID is not set; refusing to create a checkout session.");
+            return NextResponse.json(
+                { error: "Checkout ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut." },
+                { status: 500 }
+            );
+        }
 
         // Determine the base URL
         const getBaseUrl = () => {

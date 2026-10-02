@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { PRICE_EUR } from "@/lib/pricing";
 
 // Replace these with your actual IDs from Google Ads/Analytics
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -52,7 +53,7 @@ export function GoogleAnalytics() {
 }
 
 // Conversion tracking function - call this after successful purchase
-export function trackConversion(value: number = 3.99, currency: string = "EUR") {
+export function trackConversion(value: number = PRICE_EUR, currency: string = "EUR") {
     const conversionId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
     const conversionLabel = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
 

@@ -1,9 +1,11 @@
+import { PRICE_LABEL } from "@/lib/pricing";
+
 const COLUMNS = ["VertragsKlar", "Anwaltliche Erstberatung", "Selbst recherchieren"] as const;
 
 type Row = { label: string; values: [string, string, string] };
 
 const ROWS: Row[] = [
-    { label: "Kosten", values: ["3,99 €", "bis 226,10 € (§ 34 RVG)", "kostenlos"] },
+    { label: "Kosten", values: [PRICE_LABEL, "bis 226,10 € (§ 34 RVG)", "kostenlos"] },
     { label: "Dauer", values: ["wenige Minuten", "Termin, oft Tage", "Stunden"] },
     { label: "Jede Klausel geprüft", values: ["ja, fünf Fachprüfer", "ja", "selten vollständig"] },
     { label: "Mit Paragraph und Zitat", values: ["ja", "ja", "nein"] },

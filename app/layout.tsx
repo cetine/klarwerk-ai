@@ -5,6 +5,7 @@ import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { archivo, tinos } from "./fonts";
 import "./globals.css";
+import { PRICE_SCHEMA } from "@/lib/pricing";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -94,7 +95,7 @@ export default function RootLayout({
               "operatingSystem": "Web",
               "offers": {
                 "@type": "Offer",
-                "price": "3.99",
+                "price": PRICE_SCHEMA,
                 "priceCurrency": "EUR"
               },
               "description": "KI-gestützte Vertragsanalyse für deutsche Verträge."
