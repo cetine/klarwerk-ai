@@ -38,7 +38,7 @@ describe('/api/checkout', () => {
     it('refuses to create a session when STRIPE_PRICE_ID is not set', async () => {
         delete process.env.STRIPE_PRICE_ID;
 
-        const response = await POST(createRequest({ email: 'a@b.de', fileId: 'file-1' }) as any);
+        const response = await POST(createRequest({ email: 'a@b.de', fileId: 'file-1' }) as unknown as Request);
 
         expect(response.status).toBe(500);
         expect(stripe.checkout.sessions.create).not.toHaveBeenCalled();
@@ -51,7 +51,7 @@ describe('/api/checkout', () => {
             url: 'https://checkout.stripe.com/test',
         });
 
-        const response = await POST(createRequest({ email: 'a@b.de', fileId: 'file-1' }) as any);
+        const response = await POST(createRequest({ email: 'a@b.de', fileId: 'file-1' }) as unknown as Request);
         const data = await response.json();
 
         expect(response.status).toBe(200);
