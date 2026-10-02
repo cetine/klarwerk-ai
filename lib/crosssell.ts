@@ -1,7 +1,7 @@
 // Cross-link to Nebenkosten-Ninja, the sister product for checking utility bills.
 const NEBENKOSTEN_NINJA_URL = "https://nebenkosten-ninja.de";
 
-export type CrossSellPlacement = "report" | "footer";
+export type CrossSellPlacement = "report" | "footer" | "popup";
 
 export function nebenkostenNinjaUrl(placement: CrossSellPlacement): string {
     const url = new URL(NEBENKOSTEN_NINJA_URL);

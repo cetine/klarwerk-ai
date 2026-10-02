@@ -18,7 +18,7 @@ describe('nebenkostenNinjaUrl', () => {
         );
     });
 
-    it('marks footer clicks separately', () => {
-        expect(new URL(nebenkostenNinjaUrl('footer')).searchParams.get('utm_medium')).toBe('footer');
+    it.each(['footer', 'popup'] as const)('marks %s clicks separately', (placement) => {
+        expect(new URL(nebenkostenNinjaUrl(placement)).searchParams.get('utm_medium')).toBe(placement);
     });
 });

@@ -481,3 +481,24 @@ a {
     transform: none;
   }
 }
+
+/* Nebenkosten-Ninja margin note: slides up and settles at a slight tilt, like a pinned note */
+.vk-note {
+  rotate: -1deg;
+  animation: vk-note-in 480ms var(--ease-out-strong) both;
+}
+@keyframes vk-note-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    rotate: 2deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vk-note {
+    animation: vk-note-fade 200ms ease both;
+  }
+  @keyframes vk-note-fade {
+    from { opacity: 0; }
+  }
+}
