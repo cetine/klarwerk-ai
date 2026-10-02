@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { nebenkostenNinjaUrl } from "@/lib/crosssell";
+import { CONSENT_DECIDED_EVENT } from "@/components/ConsentBanner";
 
 const SEEN_KEY = "vk_nk_note_seen";
-const TRIGGER_SECTION_ID = "faq";
+const SCROLL_TRIGGER_PX = 300;
+const TIME_TRIGGER_MS = 6000;
 
 function readStorage(key: string): string | null {
     try {
@@ -23,30 +25,50 @@ function writeStorage(key: string, value: string): void {
     }
 }
 
+function isTypingInForm(): boolean {
+    return document.activeElement?.closest("form") != null;
+}
+
 /**
- * Margin note pointing to Nebenkosten-Ninja. Appears once per visitor, after the visitor has
- * scrolled past the price into the FAQ, so it never competes with the offer itself.
- * Waits for the cookie decision because the consent banner occupies the same corner.
+ * Margin note pointing to Nebenkosten-Ninja. Appears once per visitor, after a short scroll or
+ * a few seconds on the page, whichever comes first. It then still waits for the cookie decision
+ * (the consent banner occupies the same corner) and for the visitor to leave the upload form.
  */
 export function NebenkostenNote() {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
         if (readStorage(SEEN_KEY)) return;
-        const section = document.getElementById(TRIGGER_SECTION_ID);
-        if (!section) return;
+        let triggered = false;
 
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (!entry.isIntersecting || readStorage("cookie_consent") === null) return;
-                writeStorage(SEEN_KEY, "1");
-                setOpen(true);
-                observer.disconnect();
-            },
-            { rootMargin: "0px 0px -35% 0px" }
-        );
-        observer.observe(section);
-        return () => observer.disconnect();
+        const tryOpen = () => {
+            if (!triggered || readStorage("cookie_consent") === null || isTypingInForm()) return;
+            writeStorage(SEEN_KEY, "1");
+            setOpen(true);
+            cleanup();
+        };
+        const trigger = () => {
+            triggered = true;
+            tryOpen();
+        };
+        const onScroll = () => {
+            if (window.scrollY >= SCROLL_TRIGGER_PX) trigger();
+            else tryOpen();
+        };
+        // Focus moves on after the form handler ran; check once it has settled.
+        const onFocusOut = () => setTimeout(tryOpen, 0);
+
+        const timer = setTimeout(trigger, TIME_TRIGGER_MS);
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener(CONSENT_DECIDED_EVENT, tryOpen);
+        document.addEventListener("focusout", onFocusOut);
+        function cleanup() {
+            clearTimeout(timer);
+            window.removeEventListener("scroll", onScroll);
+            window.removeEventListener(CONSENT_DECIDED_EVENT, tryOpen);
+            document.removeEventListener("focusout", onFocusOut);
+        }
+        return cleanup;
     }, []);
 
     useEffect(() => {
@@ -63,7 +85,7 @@ export function NebenkostenNote() {
     return (
         <aside
             aria-label="Hinweis auf Nebenkosten-Ninja"
-            className="vk-note vk-sheet fixed inset-x-4 bottom-4 z-40 p-5 pr-12 md:inset-x-auto md:right-8 md:bottom-8 md:w-[22rem]"
+            className="vk-note vk-sheet fixed inset-x-4 bottom-4 z-40 p-4 pr-12 md:inset-x-auto md:p-5 md:pr-12 md:right-8 md:bottom-8 md:w-[22rem]"
         >
             <button
                 type="button"
@@ -73,11 +95,11 @@ export function NebenkostenNote() {
             >
                 <X className="size-4" aria-hidden />
             </button>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">Randnotiz</p>
-            <p className="vk-narrow vk-balance mt-2 text-[1.375rem] font-bold leading-[1.15] tracking-[-0.01em]">
+            <p className="hidden text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft md:block">Randnotiz</p>
+            <p className="vk-narrow vk-balance text-[1.1875rem] md:mt-2 md:text-[1.375rem] font-bold leading-[1.15] tracking-[-0.01em]">
                 Ihr Mietvertrag ist nur die halbe Miete.
             </p>
-            <p className="mt-2 text-[0.9375rem] leading-[1.45] text-ink-soft">
+            <p className="mt-1.5 text-sm leading-[1.45] text-ink-soft md:mt-2 md:text-[0.9375rem]">
                 Die andere Hälfte steckt in der{" "}
                 <mark className="vk-mark vk-mark-word vk-draw text-ink" style={{ "--d": "450ms" } as React.CSSProperties}>
                     Nebenkostenabrechnung
@@ -89,7 +111,7 @@ export function NebenkostenNote() {
                 target="_blank"
                 rel="noopener"
                 onClick={() => setOpen(false)}
-                className="vk-press mt-4 inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-semibold text-ink"
+                className="vk-press mt-1 inline-flex min-h-11 md:mt-3 items-center gap-2 text-[0.9375rem] font-semibold text-ink"
             >
                 <span className="vk-link">Zu Nebenkosten-Ninja</span>
                 <span className="vk-arrow" aria-hidden>
