@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { isTenancyContract, nebenkostenNinjaUrl } from "@/lib/crosssell";
 
 interface CriticalClause {
     title: string;
@@ -577,6 +578,21 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
                         </ul>
                     </CardContent>
                 </Card>
+            )}
+
+            {/* Cross-link for tenancy contracts; new tab, because the report only lives in this page's state */}
+            {isTenancyContract(analysis.contractType) && (
+                <p className="no-print rounded-xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-600">
+                    Nebenkostenabrechnung erhalten?{" "}
+                    <a
+                        href={nebenkostenNinjaUrl("report")}
+                        target="_blank"
+                        rel="noopener"
+                        className="font-medium text-slate-900 underline underline-offset-2 hover:text-slate-700"
+                    >
+                        Mit Nebenkosten-Ninja können Sie sie kostenlos prüfen.
+                    </a>
+                </p>
             )}
 
             {/* Disclaimer */}
