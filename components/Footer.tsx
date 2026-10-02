@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/landing/SiteHeader";
+import { nebenkostenNinjaUrl } from "@/lib/crosssell";
 
 const LINKS = [
     { href: "/legal/impressum", label: "Impressum" },
@@ -29,6 +30,14 @@ export function Footer() {
                                 </Link>
                             </li>
                         ))}
+                        <li>
+                            <a
+                                href={nebenkostenNinjaUrl("footer")}
+                                className="inline-flex min-h-11 items-center px-2 text-ink-soft hover:text-ink"
+                            >
+                                <span className="vk-link">Nebenkosten prüfen: Nebenkosten-Ninja</span>
+                            </a>
+                        </li>
                         <li>
                             <a
                                 href="mailto:noreply@vertragsklar.de"

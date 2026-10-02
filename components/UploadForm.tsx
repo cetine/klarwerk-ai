@@ -3,6 +3,7 @@
 import * as React from "react";
 import { FileText, Loader2, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PRICE_LABEL } from "@/lib/pricing";
 
 const MAX_BYTES = 50 * 1024 * 1024;
 const ALLOWED_TYPES = [
@@ -256,7 +257,7 @@ export function UploadForm() {
                     </>
                 ) : (
                     <>
-                        Prüfen lassen <span className="font-normal opacity-80">·</span> 3,99 €
+                        Prüfen lassen <span className="font-normal opacity-80">·</span> {PRICE_LABEL}
                         <span aria-hidden className="vk-arrow">→</span>
                     </>
                 )}

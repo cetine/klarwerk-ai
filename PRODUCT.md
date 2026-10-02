@@ -10,10 +10,10 @@ web
 Private individuals in Germany (tenants, employees, consumers) holding a contract they have signed or are about to sign — Mietvertrag, Arbeitsvertrag, Kaufvertrag, AGB. They are not lawyers, are uneasy about what they might be agreeing to, and want a fast, cheap first opinion before deciding whether to sign, negotiate, or go to a Mieterverein / Fachanwalt.
 
 ## Product Purpose
-Upload a contract, pay 3,99 € once, get an automated first assessment in the browser: contract type, overall score and traffic-light risk level, critical clauses quoted from the contract with explanation and legal basis (§), positive aspects, negotiation points, recommendations. Success = the visitor understands what in their contract is worth worrying about, in plain German, within minutes.
+Upload a contract, pay 4,99 € once, get an automated first assessment in the browser: contract type, overall score and traffic-light risk level, critical clauses quoted from the contract with explanation and legal basis (§), positive aspects, negotiation points, recommendations. Success = the visitor understands what in their contract is worth worrying about, in plain German, within minutes.
 
 ## Positioning
-One-off 3,99 € per contract, no account, no subscription. Clause-level findings quoted from the user's own contract with the relevant §, not a generic checklist.
+One-off 4,99 € per contract, no account, no subscription. Clause-level findings quoted from the user's own contract with the relevant §, not a generic checklist.
 
 ## Operating Context
 Flow: upload (PDF, DOC, DOCX, TXT, max 50 MB; text is extracted server-side) + e-mail → Stripe Checkout → /success runs the analysis and shows the report in the browser; "Als PDF speichern" via print. The e-mail goes to Stripe (receipt); the report is NOT e-mailed.

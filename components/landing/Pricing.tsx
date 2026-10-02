@@ -1,3 +1,5 @@
+import { PRICE_LABEL } from "@/lib/pricing";
+
 const INCLUDED = [
     "Vertragstyp und Gesamteinschätzung mit Ampel",
     "Kritische Klauseln als Zitat, mit Paragraph und Erklärung",
@@ -15,7 +17,7 @@ export function Pricing() {
                         Ein Preis, ein Vertrag.
                     </h2>
                     <p className="vk-narrow mt-6 text-[clamp(3.5rem,8vw,5.5rem)] font-bold leading-none tracking-[-0.03em]">
-                        3,99 €
+                        {PRICE_LABEL}
                     </p>
                     <p className="mt-3 text-[1.0625rem] text-ink-soft">
                         pro Vertrag, einmalig bezahlt. Kein Konto, kein Abo, keine Folgekosten.

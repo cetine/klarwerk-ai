@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { PRICE_LABEL } from "@/lib/pricing";
 
 const STEPS = [
     {
@@ -6,7 +7,7 @@ const STEPS = [
         text: "PDF, Word oder Text, bis 50 MB. Am besten eine Datei mit markierbarem Text: Eingescannte Seiten ohne Textebene können wir nicht lesen.",
     },
     {
-        title: "3,99 € bezahlen",
+        title: `${PRICE_LABEL} bezahlen`,
         text: "Die Zahlung läuft über Stripe. An Ihre E-Mail-Adresse geht die Quittung.",
     },
     {

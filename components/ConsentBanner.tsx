@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 
+/** Fired on window once the visitor accepts or declines, so other corner UI can wait for it. */
+export const CONSENT_DECIDED_EVENT = "vk:consent-decided";
+
 export function ConsentBanner() {
     const [showBanner, setShowBanner] = useState(false);
 
@@ -31,12 +34,14 @@ export function ConsentBanner() {
         updateConsent("granted");
         localStorage.setItem("cookie_consent", "granted");
         setShowBanner(false);
+        window.dispatchEvent(new Event(CONSENT_DECIDED_EVENT));
     };
 
     const handleDecline = () => {
         updateConsent("denied");
         localStorage.setItem("cookie_consent", "denied");
         setShowBanner(false);
+        window.dispatchEvent(new Event(CONSENT_DECIDED_EVENT));
     };
 
     if (!showBanner) return null;
