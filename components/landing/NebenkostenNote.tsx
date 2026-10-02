@@ -40,9 +40,11 @@ export function NebenkostenNote() {
     useEffect(() => {
         if (readStorage(SEEN_KEY)) return;
         let triggered = false;
+        let disposed = false;
+        let focusTimer: ReturnType<typeof setTimeout> | undefined;
 
         const tryOpen = () => {
-            if (!triggered || readStorage("cookie_consent") === null || isTypingInForm()) return;
+            if (disposed || !triggered || readStorage("cookie_consent") === null || isTypingInForm()) return;
             writeStorage(SEEN_KEY, "1");
             setOpen(true);
             cleanup();
@@ -56,14 +58,19 @@ export function NebenkostenNote() {
             else tryOpen();
         };
         // Focus moves on after the form handler ran; check once it has settled.
-        const onFocusOut = () => setTimeout(tryOpen, 0);
+        const onFocusOut = () => {
+            clearTimeout(focusTimer);
+            focusTimer = setTimeout(tryOpen, 0);
+        };
 
         const timer = setTimeout(trigger, TIME_TRIGGER_MS);
         window.addEventListener("scroll", onScroll, { passive: true });
         window.addEventListener(CONSENT_DECIDED_EVENT, tryOpen);
         document.addEventListener("focusout", onFocusOut);
         function cleanup() {
+            disposed = true;
             clearTimeout(timer);
+            clearTimeout(focusTimer);
             window.removeEventListener("scroll", onScroll);
             window.removeEventListener(CONSENT_DECIDED_EVENT, tryOpen);
             document.removeEventListener("focusout", onFocusOut);
